@@ -98,17 +98,17 @@
     }
 
     .hamburger {
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      border: none;
+      border-radius: 0;
       width: 38px;
       height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--bg);
+      background: transparent;
       color: var(--text);
       cursor: pointer;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .search-bar {
@@ -120,20 +120,28 @@
     }
 
     .search-bar input {
+      display: none;
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      border: none;
+      border-radius: 0;
+      background: #f7f7f7;
+      color: var(--text);
+    }
+
+    .search-bar.active input {
+      display: block;
     }
 
     .search-btn {
-      width: 38px;
-      height: 38px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: var(--bg);
+      width: 34px;
+      height: 34px;
+      border: none;
+      background: transparent;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
+      padding: 0;
+      color: var(--text);
     }
 
     nav {
@@ -160,8 +168,7 @@
 
     .side-menu .close-btn {
       background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      border: none;
       width: 32px;
       height: 32px;
       text-align: center;
@@ -201,17 +208,16 @@
       padding: 8px 14px;
       font-size: 14px;
       border-radius: 999px;
-      border: 1px solid var(--border);
+      border: none;
       color: var(--text);
       cursor: pointer;
-      background: #fafafa;
+      background: transparent;
       white-space: nowrap;
     }
 
     .category-tab.active {
-      border-color: var(--primary);
       color: var(--primary);
-      background: #eef5ff;
+      background: rgba(37, 99, 235, 0.1);
     }
 
     .category-tab:hover {
@@ -627,6 +633,13 @@
         position: relative;
       }
 
+      .logo {
+        font-size: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
       .hamburger {
         display: flex;
       }
@@ -659,6 +672,10 @@
       .product-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
+      }
+
+      .product-image {
+        height: 160px;
       }
 
       .category-tabs {
@@ -727,7 +744,7 @@
         </div>
         <div class="search-bar">
           <input id="search-input" type="text" placeholder="Поиск товаров..." oninput="searchProducts()" />
-          <button class="search-btn" onclick="searchProducts()">🔍</button>
+          <button class="search-btn" onclick="toggleSearch()">🔎</button>
         </div>
         <div class="header-right">
           <button class="cart-btn" onclick="openCart()">
@@ -760,7 +777,6 @@
 
   <section class="categories" id="categories">
     <div class="container">
-      <h2>Категории</h2>
       <div class="category-tabs" id="category-tabs">
         <span class="category-tab active" data-category="all" onclick="filterProducts('all')">Все</span>
         <span class="category-tab" data-category="tops" onclick="filterProducts('tops')">Верхняя одежда</span>
@@ -793,7 +809,7 @@
       </div>
       <div class="modal-footer">
         <div class="cart-total" id="modal-total">Итого: ₽ 0</div>
-        <button class="checkout-btn" onclick="addToCartFromModal()">Добавить в корзину</button>
+        <button class="checkout-btn" onclick="addToCartFromModal()">담기</button>
       </div>
     </div>
   </div>
@@ -929,6 +945,21 @@
       renderProducts();
     }
 
+    function toggleSearch() {
+      const bar = document.querySelector('.search-bar');
+      bar.classList.toggle('active');
+      const input = document.getElementById('search-input');
+      if (bar.classList.contains('active')) {
+        input.style.display = 'block';
+        input.focus();
+      } else {
+        input.style.display = 'none';
+        input.value = '';
+        searchQuery = '';
+        renderProducts();
+      }
+    }
+
     function searchProducts() {
       const input = document.getElementById('search-input');
       searchQuery = input.value.trim().toLowerCase();
@@ -950,7 +981,7 @@
           <div class="product-info">
             <h3 class="product-title">${product.title}</h3>
             <p class="product-price">₽ ${product.price.toLocaleString()}</p>
-            <button class="product-btn" onclick="addToCart(${product.id})">Добавить в корзину</button>
+            <button class="product-btn" onclick="addToCart(${product.id})">담기</button>
           </div>
         </div>
       `).join('');
