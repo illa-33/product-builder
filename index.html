@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мужская одежда - Простой магазин</title>
+  <title>Оригинал Менс - Простой магазин</title>
   <style>
     :root {
       --bg: #ffffff;
@@ -91,62 +91,131 @@
       font-weight: bold;
     }
 
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-      gap: 4px;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .hamburger span {
-      width: 25px;
-      height: 3px;
-      background: var(--text);
-      transition: 0.3s;
+    .hamburger {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      max-width: 420px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+
+    .search-btn {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 16px;
     }
 
     nav {
-      display: flex;
-    }
-
-    nav ul {
-      display: flex;
-      list-style: none;
-      gap: 40px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    nav a:hover,
-    nav a.active {
-      color: var(--primary);
-    }
-
-    /* Mobile Menu */
-    .mobile-menu {
       display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
       background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      padding: 20px 0;
+      border-right: 1px solid var(--border);
+      box-shadow: 3px 0 16px rgba(0,0,0,0.15);
+      transition: left 0.25s ease;
+      z-index: 2000;
+      padding: 20px;
     }
 
-    .mobile-menu.active {
-      display: block;
+    .side-menu.open {
+      left: 0;
     }
 
-    .mobile-menu ul {
-      flex-direction: column;
-      gap: 20px;
+    .side-menu .close-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
       text-align: center;
+      font-size: 24px;
+      line-height: 0;
+      cursor: pointer;
+      margin-bottom: 18px;
+    }
+
+    .side-menu ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-left: 0;
+    }
+
+    .side-menu li a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .category-tabs {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 4px;
+      margin-bottom: 24px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .category-tab {
+      display: inline-flex;
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      background: #fafafa;
+      white-space: nowrap;
+    }
+
+    .category-tab.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #eef5ff;
+    }
+
+    .category-tab:hover {
+      opacity: 0.9;
     }
 
     /* Hero Banner */
@@ -254,8 +323,8 @@
 
     .product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 40px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 24px;
     }
 
     .product-card {
@@ -263,6 +332,47 @@
       border: 1px solid var(--border);
       overflow: hidden;
       transition: all 0.3s;
+    }
+
+    .product-image img,
+    .product-detail-image img,
+    .cart-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 220px;
+      background: var(--hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .product-detail-image {
+      width: 100%;
+      height: 280px;
+      background: var(--hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      background: var(--hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
     .product-card:hover {
@@ -546,14 +656,18 @@
         font-size: 28px;
       }
 
-      .category-grid,
       .product-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
       }
 
-      .category-card {
-        padding: 30px 20px;
+      .category-tabs {
+        justify-content: flex-start;
+      }
+
+      .category-tab {
+        padding: 8px 12px;
+        font-size: 13px;
       }
 
       .modal-content {
@@ -607,39 +721,34 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <div class="logo">МУЖСКАЯ ОДЕЖДА</div>
-        <nav>
-          <ul>
-            <li><a href="#categories" class="active">Категории</a></li>
-            <li><a href="#products">Товары</a></li>
-            <li><a href="#about">О нас</a></li>
-            <li><a href="#contact">Контакты</a></li>
-          </ul>
-        </nav>
+        <div class="header-left">
+          <button class="hamburger" onclick="openSideMenu()">☰</button>
+          <div class="logo">ОРИГИНАЛ МЕНС</div>
+        </div>
+        <div class="search-bar">
+          <input id="search-input" type="text" placeholder="Поиск товаров..." oninput="searchProducts()" />
+          <button class="search-btn" onclick="searchProducts()">🔍</button>
+        </div>
         <div class="header-right">
           <button class="cart-btn" onclick="openCart()">
             🛒
             <span class="cart-count" id="cart-count">0</span>
           </button>
-          <div class="hamburger" onclick="toggleMobileMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
         </div>
-      </div>
-      <div class="mobile-menu" id="mobile-menu">
-        <nav>
-          <ul>
-            <li><a href="#categories">Категории</a></li>
-            <li><a href="#products">Товары</a></li>
-            <li><a href="#about">О нас</a></li>
-            <li><a href="#contact">Контакты</a></li>
-          </ul>
-        </nav>
       </div>
     </div>
   </header>
+
+  <div class="side-menu" id="side-menu" aria-hidden="true">
+    <button class="close-btn" onclick="closeSideMenu()">×</button>
+    <ul>
+      <li><a href="#" onclick="filterProducts('tops'); closeSideMenu(); return false;">Верхняя одежда</a></li>
+      <li><a href="#" onclick="filterProducts('bottoms'); closeSideMenu(); return false;">Нижняя одежда</a></li>
+      <li><a href="#" onclick="filterProducts('outer'); closeSideMenu(); return false;">Аутерхуэр</a></li>
+      <li><a href="#" onclick="filterProducts('shoes'); closeSideMenu(); return false;">Обувь</a></li>
+      <li><a href="#" onclick="filterProducts('bags'); closeSideMenu(); return false;">Сумки</a></li>
+    </ul>
+  </div>
 
   <section class="hero">
     <div class="hero-content">
@@ -652,31 +761,13 @@
   <section class="categories" id="categories">
     <div class="container">
       <h2>Категории</h2>
-      <div class="category-grid">
-        <div class="category-card active" data-category="all" onclick="filterProducts('all')">
-          <h3>Все товары</h3>
-          <p>Посмотреть все</p>
-        </div>
-        <div class="category-card" data-category="tops" onclick="filterProducts('tops')">
-          <h3>Верхняя одежда</h3>
-          <p>Рубашки, футболки, свитера</p>
-        </div>
-        <div class="category-card" data-category="bottoms" onclick="filterProducts('bottoms')">
-          <h3>Нижняя одежда</h3>
-          <p>Брюки, джинсы, шорты</p>
-        </div>
-        <div class="category-card" data-category="outer" onclick="filterProducts('outer')">
-          <h3>Верхняя одежда</h3>
-          <p>Куртки, пальто, ветровки</p>
-        </div>
-        <div class="category-card" data-category="shoes" onclick="filterProducts('shoes')">
-          <h3>Обувь</h3>
-          <p>Кроссовки, ботинки, туфли</p>
-        </div>
-        <div class="category-card" data-category="bags" onclick="filterProducts('bags')">
-          <h3>Аксессуары</h3>
-          <p>Сумки, ремни, очки</p>
-        </div>
+      <div class="category-tabs" id="category-tabs">
+        <span class="category-tab active" data-category="all" onclick="filterProducts('all')">Все</span>
+        <span class="category-tab" data-category="tops" onclick="filterProducts('tops')">Верхняя одежда</span>
+        <span class="category-tab" data-category="bottoms" onclick="filterProducts('bottoms')">Нижняя одежда</span>
+        <span class="category-tab" data-category="outer" onclick="filterProducts('outer')">Аутерхуэр</span>
+        <span class="category-tab" data-category="shoes" onclick="filterProducts('shoes')">Обувь</span>
+        <span class="category-tab" data-category="bags" onclick="filterProducts('bags')">Сумки</span>
       </div>
     </div>
   </section>
@@ -735,111 +826,126 @@
   <script>
     // Product data
     const products = [
-      {
-        id: 1,
-        category: 'tops',
-        title: 'Классическая рубашка',
-        price: 3500,
-        description: 'Элегантная белая рубашка из хлопка премиум качества. Идеально подходит для деловых встреч и повседневного ношения.',
-        image: 'Фото товара'
-      },
-      {
-        id: 2,
-        category: 'bottoms',
-        title: 'Темные джинсы',
-        price: 4200,
-        description: 'Классические темные джинсы с идеальной посадкой. Изготовлены из высококачественного денима.',
-        image: 'Фото товара'
-      },
-      {
-        id: 3,
-        category: 'outer',
-        title: 'Стильная куртка',
-        price: 8900,
-        description: 'Современная куртка в минималистичном стиле. Защищает от ветра и холода, сохраняя комфорт.',
-        image: 'Фото товара'
-      },
-      {
-        id: 4,
-        category: 'shoes',
-        title: 'Белые кроссовки',
-        price: 6500,
-        description: 'Удобные белые кроссовки для повседневного использования. Комфорт и стиль в одном.',
-        image: 'Фото товара'
-      },
-      {
-        id: 5,
-        category: 'tops',
-        title: 'Серый свитер',
-        price: 4800,
-        description: 'Мягкий серый свитер из натуральной шерсти. Теплый и стильный вариант для холодного времени года.',
-        image: 'Фото товара'
-      },
-      {
-        id: 6,
-        category: 'bottoms',
-        title: 'Бежевые брюки',
-        price: 5200,
-        description: 'Элегантные бежевые брюки классического кроя. Универсальный вариант для любого случая.',
-        image: 'Фото товара'
-      },
-      {
-        id: 7,
-        category: 'outer',
-        title: 'Черный плащ',
-        price: 12500,
-        description: 'Классический черный плащ с водонепроницаемой пропиткой. Идеален для дождливой погоды.',
-        image: 'Фото товара'
-      },
-      {
-        id: 8,
-        category: 'shoes',
-        title: 'Коричневые ботинки',
-        price: 7800,
-        description: 'Стильные коричневые ботинки из натуральной кожи. Комфорт и долговечность гарантированы.',
-        image: 'Фото товара'
-      }
+      { id: 1, category: 'tops', title: 'Белая рубашка', price: 3500, description: 'Элегантная рубашка из хлопка. Идеальна для офиса и встреч.', image: 'https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=600&q=80' },
+      { id: 2, category: 'tops', title: 'Темный футболка', price: 2200, description: 'Базовая футболка с плотной посадкой. Удобная и дышащая.', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80' },
+      { id: 3, category: 'tops', title: 'Синий поло', price: 2900, description: 'Футболка-поло из мягкой ткани, для повседневного стиля.', image: 'https://images.unsplash.com/photo-1520975925923-399a8ef67fa4?auto=format&fit=crop&w=600&q=80' },
+      { id: 4, category: 'tops', title: 'Утепленный свитер', price: 4800, description: 'Теплый маечный свитер с высокой горловиной.', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80' },
+      { id: 5, category: 'bottoms', title: 'Черные джинсы', price: 4200, description: 'Классические узкие джинсы из стрейч-денима.', image: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80' },
+      { id: 6, category: 'bottoms', title: 'Бежевые чиносы', price: 5200, description: 'Удобные чиносы для городского стиля.', image: 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=600&q=80' },
+      { id: 7, category: 'bottoms', title: 'Спортивные шорты', price: 3100, description: 'Легкие шорты для тренировок и отдыха.', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80' },
+      { id: 8, category: 'bottoms', title: 'Серые брюки', price: 5600, description: 'Строгие брюки для офиса и формальных событий.', image: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=600&q=80' },
+      { id: 9, category: 'outer', title: 'Осенняя куртка', price: 8900, description: 'Легкая куртка с капюшоном и защитой от ветра.', image: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80' },
+      { id: 10, category: 'outer', title: 'Черная ветровка', price: 7800, description: 'Стильная ветровка с водоотталкивающей пропиткой.', image: 'https://images.unsplash.com/photo-1495126617001-ecfd29ca90a7?auto=format&fit=crop&w=600&q=80' },
+      { id: 11, category: 'outer', title: 'Пуховик', price: 14500, description: 'Теплый пуховик для мороза и снега.', image: 'https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?auto=format&fit=crop&w=600&q=80' },
+      { id: 12, category: 'outer', title: 'Пальто', price: 12500, description: 'Элегантное пальто на осень-зиму.', image: 'https://images.unsplash.com/photo-1518552781450-5d0e0e7b0cf5?auto=format&fit=crop&w=600&q=80' },
+      { id: 13, category: 'shoes', title: 'Белые кроссовки', price: 6500, description: 'Удобные кроссовки для прогулок и спорта.', image: 'https://images.unsplash.com/photo-1528701800489-20c55ae9f0d8?auto=format&fit=crop&w=600&q=80' },
+      { id: 14, category: 'shoes', title: 'Ботинки дерби', price: 9200, description: 'Классические кожаные ботинки на каждый день.', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80' },
+      { id: 15, category: 'shoes', title: 'Спортивные кеды', price: 5300, description: 'Легкие кеды для активного образа жизни.', image: 'https://images.unsplash.com/photo-1517659023-0fd7a9f05458?auto=format&fit=crop&w=600&q=80' },
+      { id: 16, category: 'shoes', title: 'Лоферы', price: 7600, description: 'Стильные мокасины для городской моды.', image: 'https://images.unsplash.com/photo-1500471167420-17dc60f69de6?auto=format&fit=crop&w=600&q=80' },
+      { id: 17, category: 'bags', title: 'Кожаный рюкзак', price: 8900, description: 'Минималистичный рюкзак для работы и путешествий.', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80' },
+      { id: 18, category: 'bags', title: 'Сумка через плечо', price: 6200, description: 'Стильная сумка для документов и гаджетов.', image: 'https://images.unsplash.com/photo-1498105048779-af8cf7d6e9e0?auto=format&fit=crop&w=600&q=80' },
+      { id: 19, category: 'bags', title: 'Дорожная сумка', price: 10300, description: 'Прочная сумка для поездок и выходных.', image: 'https://images.unsplash.com/photo-1533113489211-3f7101f46785?auto=format&fit=crop&w=600&q=80' },
+      { id: 20, category: 'bags', title: 'Поясная сумка', price: 3600, description: 'Удобная бананка для города и путешествий.', image: 'https://images.unsplash.com/photo-1525716009435-0d0f1b9e89a7?auto=format&fit=crop&w=600&q=80' }
     ];
 
     let cart = [];
     let currentProduct = null;
     let currentFilter = 'all';
+    let searchQuery = '';
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
       renderProducts();
       updateCartCount();
+
+      const tabs = document.getElementById('category-tabs');
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      tabs.addEventListener('mousedown', (e) => {
+        isDown = true;
+        tabs.classList.add('active-drag');
+        startX = e.pageX - tabs.offsetLeft;
+        scrollLeft = tabs.scrollLeft;
+      });
+
+      tabs.addEventListener('mouseleave', () => {
+        isDown = false;
+        tabs.classList.remove('active-drag');
+      });
+
+      tabs.addEventListener('mouseup', () => {
+        isDown = false;
+        tabs.classList.remove('active-drag');
+      });
+
+      tabs.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - tabs.offsetLeft;
+        const walk = (x - startX) * 1.3;
+        tabs.scrollLeft = scrollLeft - walk;
+      });
+
+      tabs.addEventListener('touchstart', (e) => {
+        isDown = true;
+        startX = e.touches[0].pageX - tabs.offsetLeft;
+        scrollLeft = tabs.scrollLeft;
+      });
+
+      tabs.addEventListener('touchend', () => {
+        isDown = false;
+      });
+
+      tabs.addEventListener('touchmove', (e) => {
+        if (!isDown) return;
+        const x = e.touches[0].pageX - tabs.offsetLeft;
+        const walk = (x - startX) * 1.3;
+        tabs.scrollLeft = scrollLeft - walk;
+      });
     });
 
-    // Mobile menu toggle
+    // Side menu toggle
+    function openSideMenu() {
+      document.getElementById('side-menu').classList.add('open');
+    }
+
+    function closeSideMenu() {
+      document.getElementById('side-menu').classList.remove('open');
+    }
+
     function toggleMobileMenu() {
-      const menu = document.getElementById('mobile-menu');
-      menu.classList.toggle('active');
+      const menu = document.getElementById('side-menu');
+      menu.classList.toggle('open');
     }
 
     // Filter products
     function filterProducts(category) {
       currentFilter = category;
-
-      // Update active category
-      document.querySelectorAll('.category-card').forEach(card => {
-        card.classList.remove('active');
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.category === category);
       });
-      document.querySelector(`[data-category="${category}"]`).classList.add('active');
+      renderProducts();
+    }
 
+    function searchProducts() {
+      const input = document.getElementById('search-input');
+      searchQuery = input.value.trim().toLowerCase();
       renderProducts();
     }
 
     // Render products
     function renderProducts() {
       const grid = document.getElementById('product-grid');
-      const filteredProducts = currentFilter === 'all' ?
-        products : products.filter(p => p.category === currentFilter);
+      const filteredProducts = products
+        .filter(p => currentFilter === 'all' || p.category === currentFilter)
+        .filter(p => p.title.toLowerCase().includes(searchQuery));
 
       grid.innerHTML = filteredProducts.map(product => `
         <div class="product-card">
           <div class="product-image" onclick="openProductModal(${product.id})">
-            ${product.image}
+            <img src="${product.image}" alt="${product.title}">
           </div>
           <div class="product-info">
             <h3 class="product-title">${product.title}</h3>
@@ -859,7 +965,7 @@
       const body = document.getElementById('product-modal-body');
 
       body.innerHTML = `
-        <div class="product-detail-image">${currentProduct.image}</div>
+        <div class="product-detail-image"><img src="${currentProduct.image}" alt="${currentProduct.title}"></div>
         <h3 class="product-detail-title">${currentProduct.title}</h3>
         <p class="product-detail-price">₽ ${currentProduct.price.toLocaleString()}</p>
         <p class="product-detail-description">${currentProduct.description}</p>
@@ -935,7 +1041,7 @@
       } else {
         itemsContainer.innerHTML = cart.map(item => `
           <div class="cart-item">
-            <div class="cart-item-image">${item.image}</div>
+            <div class="cart-item-image"><img src="${item.image}" alt="${item.title}"></div>
             <div class="cart-item-info">
               <h4 class="cart-item-title">${item.title}</h4>
               <p class="cart-item-price">₽ ${item.price.toLocaleString()} × ${item.quantity}</p>
