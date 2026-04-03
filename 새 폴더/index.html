@@ -3,262 +3,372 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>심플 의류 쇼핑몰</title>
+  <title>오리지날 맨즈</title>
   <style>
     :root {
-      --bg: #f9f7f1;
-      --primary: #1a2a4a;
-      --accent: #e16f7d;
+      --bg: #f7f7f7;
+      --primary: #1c1f26;
+      --accent: #dc5f6d;
       --card: #ffffff;
-      --text: #2c2c2c;
-      --muted: #767676;
+      --text: #2f3545;
+      --muted: #6f7486;
+      --border: #e1e4ec;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Noto Sans KR', Arial, sans-serif;
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
+      min-height: 100vh;
     }
 
-    header {
-      background: #fff;
-      border-bottom: 1px solid #e9e9e9;
-      padding: 1rem 1.25rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
+    header { position: sticky; top: 0; z-index: 1000; background: #fff; border-bottom: 1px solid var(--border); }
     .nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1200px;
-      margin: 0 auto;
-      gap: 1rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.8rem; max-width: 1200px; margin: 0 auto; padding: 0.8rem 1rem;
+    }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+
+    .search-wrapper {
+      position: relative; flex: 1; max-width: 260px;
+    }
+    .search-input {
+      width: 100%; padding: 0.55rem 1.3rem 0.55rem 2.6rem;
+      border: 1px solid var(--border); border-radius: 999px; background: #f7f8fb;
+      color: var(--text); outline: none;
+    }
+    .search-input:focus { box-shadow: 0 0 0 3px rgba(220,95,109,0.2); }
+
+    .search-icon {
+      position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+      pointer-events: none;
+      width: 1rem; height: 1rem;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .search-icon::before {
+      content: '';
+      width: 0.8rem; height: 0.8rem;
+      mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"/></svg>') center / contain no-repeat;
+      background-color: var(--muted);
     }
 
-    .brand {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--primary);
+    .category-nav-wrapper {
+      overflow-x: auto; overflow-y: hidden; background: #fff; border-bottom: 1px solid var(--border);
+      white-space: nowrap; -webkit-overflow-scrolling: touch;
     }
-
-    .nav-links {
-      display: flex;
-      gap: 1rem;
-      font-weight: 500;
+    .category-nav {
+      display: inline-flex; gap: 0.5rem; padding: 0.55rem 0.8rem;
     }
-
-    .nav-links a {
-      color: var(--primary);
-      text-decoration: none;
+    .category-nav a {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+      text-decoration: none; color: var(--primary); font-weight: 600;
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .category-nav a:hover, .category-nav a:focus {
+      background: var(--accent); color: #fff; border-color: var(--accent);
     }
 
     .hero {
-      max-width: 1200px;
-      margin: 1.5rem auto;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-      padding: 0 1rem;
+      max-width: 1200px; margin: 1rem auto; padding: 1rem;
     }
-
     .hero-content {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 1.25rem;
-      box-shadow: 0 4px 14px rgba(0,0,0,.05);
+      background: var(--card); border-radius: 14px; padding: 1.2rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
     }
-
     .hero-content h1 {
-      margin-top: 0;
-      color: var(--primary);
-      font-size: clamp(1.5rem, 4vw, 2.4rem);
+      font-size: clamp(1.6rem, 4vw, 2.4rem); color: var(--primary); margin: 0;
+    }
+    .hero-content p { color: var(--muted); margin: 0.7rem 0;
+      font-size: 0.98rem;
     }
 
-    .hero-content p {
-      color: var(--muted);
-      margin: .75rem 0;
+    .product-section { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
+    .product-section h2 { margin: 0 0 0.8rem; font-size: 1.25rem; color: var(--primary); }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem;
     }
-
-    .shop-btn {
-      display: inline-block;
-      padding: .7rem 1.2rem;
-      border: 0;
-      border-radius: 30px;
-      background: var(--accent);
-      color: white;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .products {
-      max-width: 1200px;
-      margin: 0 auto 2rem;
-      padding: 0 1rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 1rem;
-    }
-
     .card {
-      background: var(--card);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 3px 12px rgba(0,0,0,.08);
-      transition: transform .2s ease, box-shadow .2s ease;
+      background: var(--card); border-radius: 12px; overflow: hidden;
+      border: 1px solid #eff0f5;
+      transition: transform .18s ease, box-shadow .18s ease;
+      display: flex; flex-direction: column;
     }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 7px 20px rgba(0,0,0,.15);
-    }
-
-    .card img {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      object-fit: cover;
-    }
-
-    .card-body {
-      padding: .9rem 1rem 1.1rem;
-    }
-
-    .card-title {
-      margin: 0 0 .5rem;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .card-price {
-      margin: 0;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .card-text {
-      margin: .3rem 0 .7rem;
-      color: var(--muted);
-      font-size: .92rem;
-    }
-
+    .card:hover { transform: translateY(-3px); box-shadow: 0 9px 18px rgba(0,0,0,0.08); }
+    .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+    .card-body { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+    .card-title { margin: 0; font-size: 1rem; font-weight: 700; }
+    .card-text { margin: 0; color: var(--muted); font-size: 0.91rem; }
+    .card-price { margin: 0; font-weight: 800; color: var(--accent); }
     .card button {
-      width: 100%;
-      border: 0;
-      border-radius: 8px;
-      padding: .6rem;
-      background: var(--primary);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
+      margin-top: auto; border: 0; border-radius: 8px; background: var(--primary);
+      color: #fff; padding: 0.58rem 0.7rem; font-weight: 700; cursor: pointer;
     }
 
-    footer {
-      text-align: center;
-      padding: 1.25rem 1rem;
-      background: #fff;
-      color: var(--muted);
-      border-top: 1px solid #ececec;
+    footer { text-align: center; padding: 1.2rem 1rem; background: #fff; color: var(--muted); border-top: 1px solid var(--border); }
+
+    @media (min-width: 768px) {
+      .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .search-wrapper { max-width: 320px; }
+    }
+    @media (min-width: 1024px) {
+      .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .category-nav-wrapper { max-width: 1200px; margin: 0 auto; }
     }
   </style>
 </head>
 <body>
   <header>
-    <nav class="nav">
-      <div class="brand">무지개 MEN</div>
-      <div class="nav-links">
+    <div class="nav">
+      <div class="brand">오리지날 맨즈</div>
+      <div class="search-wrapper">
+        <input class="search-input" id="searchInput" type="search" placeholder="상품 검색" aria-label="상품 검색" />
+        <span class="search-icon"></span>
+      </div>
+    </div>
+    <div class="category-nav-wrapper">
+      <div class="category-nav" id="categoryNav">
         <a href="#tops">상의</a>
         <a href="#bottoms">하의</a>
         <a href="#outer">아우터</a>
         <a href="#shoes">신발</a>
         <a href="#bags">가방</a>
       </div>
-    </nav>
+    </div>
   </header>
 
   <section class="hero">
     <article class="hero-content">
-      <h1>남성 전문 심플 쇼핑몰</h1>
+      <h1>브랜드 오리지널 상품</h1>
       <p>깔끔한 디자인, 믿을 수 있는 품질. 데일리 무드에 잘 어울리는 남성용 기본템만 엄선했습니다.</p>
-      <a class="shop-btn" href="#tops">카테고리 보기</a>
     </article>
   </section>
 
-  <section class="products" id="tops">
+  <section class="product-section" id="tops">
     <h2>상의</h2>
-    <article class="card">
-      <img src="https://via.placeholder.com/400x300?text=오버사이즈+티셔츠" alt="오버사이즈 티셔츠">
-      <div class="card-body">
-        <h2 class="card-title">베이직 오버사이즈 티</h2>
-        <p class="card-text">탄탄한 원단과 데일리 핏으로 매일 입기 좋은 상의.</p>
-        <p class="card-price">₩24,000</p>
-        <button>장바구니에 담기</button>
-      </div>
-    </article>
+    <div class="products-grid" id="productsGrid">
+      <article class="card" data-name="오버사이즈 티셔츠">
+        <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80" alt="오버사이즈 티셔츠">
+        <div class="card-body">
+          <h3 class="card-title">오버사이즈 티셔츠</h3>
+          <p class="card-text">부드러운 코튼, 편안한 루즈핏.</p>
+          <p class="card-price">₩27,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="기본 라운드 티">
+        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80" alt="기본 라운드 티">
+        <div class="card-body">
+          <h3 class="card-title">기본 라운드 티</h3>
+          <p class="card-text">베이직한 색감, 매일 입기 좋아요.</p>
+          <p class="card-price">₩21,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬림핏 폴로 셔츠">
+        <img src="https://images.unsplash.com/photo-1495121605193-b116b5b9c6b9?auto=format&fit=crop&w=800&q=80" alt="슬림핏 폴로 셔츠">
+        <div class="card-body">
+          <h3 class="card-title">슬림핏 폴로 셔츠</h3>
+          <p class="card-text">모던한 데일리 스타일.</p>
+          <p class="card-price">₩32,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="테크니컬 반팔 티">
+        <img src="https://images.unsplash.com/photo-1503342452485-86c7f6a2f91d?auto=format&fit=crop&w=800&q=80" alt="테크니컬 반팔 티">
+        <div class="card-body">
+          <h3 class="card-title">테크니컬 반팔 티</h3>
+          <p class="card-text">흡습속건 기능성 소재로 쾌적함.</p>
+          <p class="card-price">₩38,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <section class="products" id="bottoms">
+  <section class="product-section" id="bottoms">
     <h2>하의</h2>
-    <article class="card">
-      <img src="https://via.placeholder.com/400x300?text=와이드+코튼+팬츠" alt="와이드 코튼 팬츠">
-      <div class="card-body">
-        <h2 class="card-title">와이드 코튼 팬츠</h2>
-        <p class="card-text">세미 와이드 핏, 가볍고 편안한 일상용 팬츠.</p>
-        <p class="card-price">₩36,000</p>
-        <button>장바구니에 담기</button>
-      </div>
-    </article>
+    <div class="products-grid">
+      <article class="card" data-name="와이드 코튼 팬츠">
+        <img src="https://images.unsplash.com/photo-1583422407696-c9f4ddf5b323?auto=format&fit=crop&w=800&q=80" alt="와이드 코튼 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">와이드 코튼 팬츠</h3>
+          <p class="card-text">편안하고 트렌디한 실루엣.</p>
+          <p class="card-price">₩35,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="테크 팬츠">
+        <img src="https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80" alt="테크 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">테크 팬츠</h3>
+          <p class="card-text">신축성 좋은 소재, 가벼운 착용감.</p>
+          <p class="card-price">₩41,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬림핏 조거팬츠">
+        <img src="https://images.unsplash.com/photo-1562690868-6aa18ee5382f?auto=format&fit=crop&w=800&q=80" alt="슬림핏 조거팬츠">
+        <div class="card-body">
+          <h3 class="card-title">슬림핏 조거팬츠</h3>
+          <p class="card-text">일상과 운동 모두 가능한 디자인.</p>
+          <p class="card-price">₩39,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="데님 컷팅 팬츠">
+        <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80" alt="데님 컷팅 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">데님 컷팅 팬츠</h3>
+          <p class="card-text">캐주얼 무드를 더하는 코튼 데님.</p>
+          <p class="card-price">₩49,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <section class="products" id="outer">
+  <section class="product-section" id="outer">
     <h2>아우터</h2>
-    <article class="card">
-      <img src="https://via.placeholder.com/400x300?text=미니멀+자켓" alt="미니멀 자켓">
-      <div class="card-body">
-        <h2 class="card-title">미니멀 블루종 자켓</h2>
-        <p class="card-text">모던한 실루엣으로 다양한 코디에 활용 가능한 아우터.</p>
-        <p class="card-price">₩88,000</p>
-        <button>장바구니에 담기</button>
-      </div>
-    </article>
+    <div class="products-grid">
+      <article class="card" data-name="스트레치 윈드브레이커">
+        <img src="https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=800&q=80" alt="스트레치 윈드브레이커">
+        <div class="card-body">
+          <h3 class="card-title">스트레치 윈드브레이커</h3>
+          <p class="card-text">방풍 기능이 뛰어난 경량 재킷.</p>
+          <p class="card-price">₩76,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="다운 패딩 자켓">
+        <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80" alt="다운 패딩 자켓">
+        <div class="card-body">
+          <h3 class="card-title">다운 패딩 자켓</h3>
+          <p class="card-text">보온성이 좋은 겨울용 패딩.</p>
+          <p class="card-price">₩119,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="후드 집업 재킷">
+        <img src="https://images.unsplash.com/photo-1542060746-81f37c7f3fb0?auto=format&fit=crop&w=800&q=80" alt="후드 집업 재킷">
+        <div class="card-body">
+          <h3 class="card-title">후드 집업 재킷</h3>
+          <p class="card-text">편안한 데일리 무드 후드웨어.</p>
+          <p class="card-price">₩89,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="울 트랙 재킷">
+        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" alt="울 트랙 재킷">
+        <div class="card-body">
+          <h3 class="card-title">울 트랙 재킷</h3>
+          <p class="card-text">부드러운 텍스처와 세련된 라인.</p>
+          <p class="card-price">₩95,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <section class="products" id="shoes">
+  <section class="product-section" id="shoes">
     <h2>신발</h2>
-    <article class="card">
-      <img src="https://via.placeholder.com/400x300?text=화이트+스니커즈" alt="화이트 스니커즈">
-      <div class="card-body">
-        <h2 class="card-title">클래식 화이트 스니커즈</h2>
-        <p class="card-text">어디에나 잘 어울리는 깔끔한 실루엣.</p>
-        <p class="card-price">₩65,000</p>
-        <button>장바구니에 담기</button>
-      </div>
-    </article>
+    <div class="products-grid">
+      <article class="card" data-name="쿠셔닝 러닝화">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" alt="쿠셔닝 러닝화">
+        <div class="card-body">
+          <h3 class="card-title">쿠셔닝 러닝화</h3>
+          <p class="card-text">경량 트레이닝, 뛰어난 그립감.</p>
+          <p class="card-price">₩89,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="오리지널 스니커즈">
+        <img src="https://images.unsplash.com/photo-1528701800489-20c72d1c79a2?auto=format&fit=crop&w=800&q=80" alt="오리지널 스니커즈">
+        <div class="card-body">
+          <h3 class="card-title">오리지널 스니커즈</h3>
+          <p class="card-text">캐주얼, 데일리 스타일에 이상적.</p>
+          <p class="card-price">₩74,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="하이탑 바스켓볼화">
+        <img src="https://images.unsplash.com/photo-1519741495080-554126f2eb49?auto=format&fit=crop&w=800&q=80" alt="하이탑 바스켓볼화">
+        <div class="card-body">
+          <h3 class="card-title">하이탑 바스켓볼화</h3>
+          <p class="card-text">스포츠 퍼포먼스에 최적화.</p>
+          <p class="card-price">₩106,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="라이프스타일 슬립온">
+        <img src="https://images.unsplash.com/photo-1528701800489-20c72d1c79a2?auto=format&fit=crop&w=800&q=80" alt="라이프스타일 슬립온">
+        <div class="card-body">
+          <h3 class="card-title">라이프스타일 슬립온</h3>
+          <p class="card-text">간편함과 스타일을 모두 갖춘 슈즈.</p>
+          <p class="card-price">₩68,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <section class="products" id="bags">
+  <section class="product-section" id="bags">
     <h2>가방</h2>
-    <article class="card">
-      <img src="https://via.placeholder.com/400x300?text=크로스백" alt="크로스백">
-      <div class="card-body">
-        <h2 class="card-title">미니멀 크로스백</h2>
-        <p class="card-text">기본 소지품 보관에 적합한 캐주얼 디자인.</p>
-        <p class="card-price">₩32,000</p>
-        <button>장바구니에 담기</button>
-      </div>
-    </article>
+    <div class="products-grid">
+      <article class="card" data-name="미니멀 숄더백">
+        <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80" alt="미니멀 숄더백">
+        <div class="card-body">
+          <h3 class="card-title">미니멀 숄더백</h3>
+          <p class="card-text">데일리 소지품을 위한 경량 디자인.</p>
+          <p class="card-price">₩34,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="스포티 토트백">
+        <img src="https://images.unsplash.com/photo-1582719478644-4e3bbd1ca2d1?auto=format&fit=crop&w=800&q=80" alt="스포티 토트백">
+        <div class="card-body">
+          <h3 class="card-title">스포티 토트백</h3>
+          <p class="card-text">넉넉한 수납과 활동성을 겸비.</p>
+          <p class="card-price">₩42,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="멀티 수납 백팩">
+        <img src="https://images.unsplash.com/photo-1574180045827-681f8a1a9622?auto=format&fit=crop&w=800&q=80" alt="멀티 수납 백팩">
+        <div class="card-body">
+          <h3 class="card-title">멀티 수납 백팩</h3>
+          <p class="card-text">여러 지퍼 포켓으로 깔끔한 정리.</p>
+          <p class="card-price">₩59,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬링 크로스백">
+        <img src="https://images.unsplash.com/photo-1514986888952-8cd320577b25?auto=format&fit=crop&w=800&q=80" alt="슬링 크로스백">
+        <div class="card-body">
+          <h3 class="card-title">슬링 크로스백</h3>
+          <p class="card-text">가볍고 빠르게 여닫기 좋은 사이즈.</p>
+          <p class="card-price">₩38,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
   </section>
 
-  <footer>
-    <p>© 2026 무지개 의류. 모든 권리 보유.</p>
-  </footer>
+  <footer><p>© 2026 오리지날 맨즈. 모든 권리 보유.</p></footer>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll('.card').forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        card.style.display = name.includes(term) ? '' : 'none';
+      });
+    });
+  </script>
 </body>
 </html>
