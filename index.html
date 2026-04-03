@@ -1,1280 +1,373 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Мужская одежда - Простой магазин</title>
+  <title>오리지날 맨즈</title>
   <style>
     :root {
-      --bg: #ffffff;
-      --text: #000000;
-      --text-muted: #666666;
-      --border: #e0e0e0;
-      --hover: #f5f5f5;
-      --accent: #000000;
-      --primary: #2563eb;
-      --success: #10b981;
-      --danger: #ef4444;
-      --shadow: rgba(0,0,0,0.1);
+      --bg: #f7f7f7;
+      --primary: #1c1f26;
+      --accent: #dc5f6d;
+      --card: #ffffff;
+      --text: #2f3545;
+      --muted: #6f7486;
+      --border: #e1e4ec;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Arial', sans-serif;
+      margin: 0;
+      font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.5;
+      min-height: 100vh;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
+    header { position: sticky; top: 0; z-index: 1000; background: #fff; border-bottom: 1px solid var(--border); }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.8rem; max-width: 1200px; margin: 0 auto; padding: 0.8rem 1rem;
     }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
-    /* Header */
-    header {
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+    .search-wrapper {
+      position: relative; flex: 1; max-width: 260px;
     }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      padding: 20px 0;
-      gap: 20px;
-    }
-
-    .hamburger {
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      gap: 4px;
-      padding: 10px;
-      border-radius: 4px;
-      transition: background 0.3s;
-    }
-
-    .hamburger:hover {
-      background: var(--hover);
-    }
-
-    .hamburger span {
-      width: 25px;
-      height: 3px;
-      background: var(--text);
-      transition: 0.3s;
-      transform-origin: center;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--text);
-      margin-right: auto;
-    }
-
-    .search-container {
-      flex: 1;
-      max-width: 400px;
-      position: relative;
-    }
-
     .search-input {
-      width: 100%;
-      padding: 12px 45px 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.3s;
+      width: 100%; padding: 0.55rem 1.3rem 0.55rem 2.6rem;
+      border: 1px solid var(--border); border-radius: 999px; background: #f7f8fb;
+      color: var(--text); outline: none;
     }
+    .search-input:focus { box-shadow: 0 0 0 3px rgba(220,95,109,0.2); }
 
-    .search-input:focus {
-      border-color: var(--primary);
+    .search-icon {
+      position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+      pointer-events: none;
+      width: 1rem; height: 1rem;
+      display: inline-flex; align-items: center; justify-content: center;
     }
-
-    .search-btn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      font-size: 18px;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-
-    .cart-btn {
-      position: relative;
-      background: none;
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 18px;
-      margin-left: 10px;
-    }
-
-    .cart-count {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: var(--danger);
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-    }
-
-    /* Mobile Menu */
-    .mobile-menu {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 280px;
-      height: 100vh;
-      background: var(--bg);
-      border-right: 1px solid var(--border);
-      padding: 80px 20px 20px;
-      transition: left 0.3s ease;
-      z-index: 1001;
-      overflow-y: auto;
-    }
-
-    .mobile-menu.active {
-      left: 0;
-    }
-
-    .mobile-menu h3 {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: var(--text);
-    }
-
-    .mobile-menu ul {
-      list-style: none;
-    }
-
-    .mobile-menu li {
-      margin-bottom: 15px;
-    }
-
-    .mobile-menu a {
-      text-decoration: none;
-      color: var(--text);
-      font-size: 16px;
-      padding: 10px 0;
-      display: block;
-      transition: color 0.3s;
-    }
-
-    .mobile-menu a:hover {
-      color: var(--primary);
-    }
-
-    .mobile-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-      z-index: 1000;
-    }
-
-    .mobile-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* Category Navigation */
-    .category-nav {
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      padding: 15px 0;
-    }
-
-    .category-nav .container {
-      display: flex;
-      gap: 30px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .category-nav .container::-webkit-scrollbar {
-      display: none;
-    }
-
-    .category-link {
-      text-decoration: none;
-      color: var(--text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      white-space: nowrap;
-      transition: color 0.3s;
-      position: relative;
-    }
-
-    .category-link:hover,
-    .category-link.active {
-      color: var(--primary);
-    }
-
-    .category-link.active::after {
+    .search-icon::before {
       content: '';
-      position: absolute;
-      bottom: -15px;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--primary);
+      width: 0.8rem; height: 0.8rem;
+      mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="black" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C8.01 14 6 11.99 6 9.5S8.01 5 10.5 5 15 7.01 15 9.5 12.99 14 10.5 14z"/></svg>') center / contain no-repeat;
+      background-color: var(--muted);
     }
 
-    /* Hero Banner */
-    .hero {
-      position: relative;
-      height: 400px;
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=400&fit=crop');
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: white;
+    .category-nav-wrapper {
+      overflow-x: auto; overflow-y: hidden; background: #fff; border-bottom: 1px solid var(--border);
+      white-space: nowrap; -webkit-overflow-scrolling: touch;
     }
-
-    .hero-content h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      font-weight: 300;
+    .category-nav {
+      display: inline-flex; gap: 0.5rem; padding: 0.55rem 0.8rem;
     }
-
-    .hero-content p {
-      font-size: 18px;
-      margin-bottom: 30px;
-      opacity: 0.9;
-    }
-
-    .hero-btn {
-      background: var(--accent);
-      color: white;
-      padding: 15px 30px;
-      text-decoration: none;
-      border: none;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .hero-btn:hover {
-      background: var(--text-muted);
-    }
-
-    /* Products */
-    .products {
-      padding: 80px 0;
-      background: var(--bg);
-    }
-
-    .products h2 {
-      text-align: center;
-      font-size: 36px;
-      margin-bottom: 60px;
-      font-weight: 300;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 40px;
-    }
-
-    .product-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px var(--shadow);
-    }
-
-    .product-image {
-      width: 100%;
-      height: 300px;
-      background: var(--hover);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--text-muted);
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s;
-    }
-
-    .product-image:hover img {
-      transform: scale(1.05);
-    }
-
-    .product-info {
-      padding: 20px;
-    }
-
-    .product-title {
-      font-size: 16px;
-      margin-bottom: 8px;
-      font-weight: 500;
-      line-height: 1.4;
-    }
-
-    .product-price {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      color: var(--primary);
-    }
-
-    .product-btn {
-      width: 100%;
-      background: var(--accent);
-      color: white;
-      padding: 12px;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    .product-btn:hover {
-      background: var(--text-muted);
-    }
-
-    /* Modals */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--bg);
-      border-radius: 8px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .modal-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-title {
-      font-size: 24px;
-      font-weight: 500;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .modal-footer {
-      padding: 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Product Detail Modal */
-    .product-detail-image {
-      width: 100%;
-      height: 300px;
-      background: var(--hover);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .product-detail-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-detail-title {
-      font-size: 20px;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-
-    .product-detail-price {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 20px;
-    }
-
-    .product-detail-description {
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-
-    .quantity-controls {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .quantity-btn {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .quantity-input {
-      width: 60px;
-      height: 40px;
-      text-align: center;
-      border: 1px solid var(--border);
-      font-size: 16px;
-    }
-
-    /* Cart Modal */
-    .cart-item {
-      display: flex;
-      gap: 15px;
-      padding: 15px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .cart-item:last-child {
-      border-bottom: none;
-    }
-
-    .cart-item-image {
-      width: 80px;
-      height: 80px;
-      background: var(--hover);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: var(--text-muted);
+    .category-nav a {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.45rem 0.9rem; border-radius: 999px; border: 1px solid var(--border);
+      text-decoration: none; color: var(--primary); font-weight: 600;
+      background: #fff;
       flex-shrink: 0;
-      position: relative;
-      overflow: hidden;
+    }
+    .category-nav a:hover, .category-nav a:focus {
+      background: var(--accent); color: #fff; border-color: var(--accent);
     }
 
-    .cart-item-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .hero {
+      max-width: 1200px; margin: 1rem auto; padding: 1rem;
+    }
+    .hero-content {
+      background: var(--card); border-radius: 14px; padding: 1.2rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    }
+    .hero-content h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem); color: var(--primary); margin: 0;
+    }
+    .hero-content p { color: var(--muted); margin: 0.7rem 0;
+      font-size: 0.98rem;
     }
 
-    .cart-item-info {
-      flex: 1;
+    .product-section { max-width: 1200px; margin: 1rem auto; padding: 0 1rem; }
+    .product-section h2 { margin: 0 0 0.8rem; font-size: 1.25rem; color: var(--primary); }
+    .products-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem;
+    }
+    .card {
+      background: var(--card); border-radius: 12px; overflow: hidden;
+      border: 1px solid #eff0f5;
+      transition: transform .18s ease, box-shadow .18s ease;
+      display: flex; flex-direction: column;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 9px 18px rgba(0,0,0,0.08); }
+    .card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+    .card-body { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+    .card-title { margin: 0; font-size: 1rem; font-weight: 700; }
+    .card-text { margin: 0; color: var(--muted); font-size: 0.91rem; }
+    .card-price { margin: 0; font-weight: 800; color: var(--accent); }
+    .card button {
+      margin-top: auto; border: 0; border-radius: 8px; background: var(--primary);
+      color: #fff; padding: 0.58rem 0.7rem; font-weight: 700; cursor: pointer;
     }
 
-    .cart-item-title {
-      font-weight: 500;
-      margin-bottom: 5px;
-      line-height: 1.4;
+    footer { text-align: center; padding: 1.2rem 1rem; background: #fff; color: var(--muted); border-top: 1px solid var(--border); }
+
+    @media (min-width: 768px) {
+      .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .search-wrapper { max-width: 320px; }
     }
-
-    .cart-item-price {
-      color: var(--primary);
-      font-weight: bold;
-    }
-
-    .cart-item-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .cart-total {
-      font-size: 20px;
-      font-weight: bold;
-      color: var(--primary);
-    }
-
-    .checkout-btn {
-      background: var(--success);
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .checkout-btn:hover {
-      background: #059669;
-    }
-
-    /* Footer */
-    footer {
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      padding: 40px 0;
-      text-align: center;
-    }
-
-    footer p {
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .header-content {
-        padding: 15px 0;
-      }
-
-      .logo {
-        font-size: 20px;
-      }
-
-      .search-container {
-        max-width: 200px;
-      }
-
-      .hero {
-        height: 300px;
-      }
-
-      .hero-content h1 {
-        font-size: 32px;
-      }
-
-      .hero-content p {
-        font-size: 16px;
-      }
-
-      .products h2 {
-        font-size: 28px;
-      }
-
-      .product-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-      }
-
-      .modal-content {
-        width: 95%;
-        margin: 20px;
-      }
-
-      .modal-footer {
-        flex-direction: column;
-        gap: 15px;
-        align-items: stretch;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        padding: 0 15px;
-      }
-
-      .header-content {
-        gap: 10px;
-      }
-
-      .logo {
-        font-size: 18px;
-      }
-
-      .search-container {
-        display: none;
-      }
-
-      .hero-content h1 {
-        font-size: 24px;
-      }
-
-      .product-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .quantity-controls {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .quantity-input {
-        width: 100%;
-      }
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .product-card {
-      animation: fadeIn 0.5s ease-out;
+    @media (min-width: 1024px) {
+      .products-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .category-nav-wrapper { max-width: 1200px; margin: 0 auto; }
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="container">
-      <div class="header-content">
-        <div class="hamburger" onclick="toggleMobileMenu()">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-        <div class="logo">МУЖСКАЯ ОДЕЖДА</div>
-        <div class="search-container">
-          <input type="text" class="search-input" id="search-input" placeholder="Поиск товаров...">
-          <button class="search-btn" onclick="searchProducts()">🔍</button>
-        </div>
-        <button class="cart-btn" onclick="openCart()">
-          🛒
-          <span class="cart-count" id="cart-count">0</span>
-        </button>
+    <div class="nav">
+      <div class="brand">오리지날 맨즈</div>
+      <div class="search-wrapper">
+        <input class="search-input" id="searchInput" type="search" placeholder="상품 검색" aria-label="상품 검색" />
+        <span class="search-icon"></span>
       </div>
     </div>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobile-menu">
-      <h3>Категории</h3>
-      <ul>
-        <li><a href="#" onclick="filterProducts('all'); closeMobileMenu();">Все товары</a></li>
-        <li><a href="#" onclick="filterProducts('tops'); closeMobileMenu();">Верхняя одежда</a></li>
-        <li><a href="#" onclick="filterProducts('bottoms'); closeMobileMenu();">Нижняя одежда</a></li>
-        <li><a href="#" onclick="filterProducts('outer'); closeMobileMenu();">Верхняя одежда</a></li>
-        <li><a href="#" onclick="filterProducts('shoes'); closeMobileMenu();">Обувь</a></li>
-        <li><a href="#" onclick="filterProducts('bags'); closeMobileMenu();">Аксессуары</a></li>
-      </ul>
+    <div class="category-nav-wrapper">
+      <div class="category-nav" id="categoryNav">
+        <a href="#tops">상의</a>
+        <a href="#bottoms">하의</a>
+        <a href="#outer">아우터</a>
+        <a href="#shoes">신발</a>
+        <a href="#bags">가방</a>
+      </div>
     </div>
-    <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
   </header>
 
-  <!-- Category Navigation -->
-  <nav class="category-nav">
-    <div class="container">
-      <a href="#" class="category-link active" onclick="filterProducts('all')">Все товары</a>
-      <a href="#" class="category-link" onclick="filterProducts('tops')">Верхняя одежда</a>
-      <a href="#" class="category-link" onclick="filterProducts('bottoms')">Нижняя одежда</a>
-      <a href="#" class="category-link" onclick="filterProducts('outer')">Верхняя одежда</a>
-      <a href="#" class="category-link" onclick="filterProducts('shoes')">Обувь</a>
-      <a href="#" class="category-link" onclick="filterProducts('bags')">Аксессуары</a>
-    </div>
-  </nav>
-
   <section class="hero">
-    <div class="hero-content">
-      <h1>Стильная мужская одежда</h1>
-      <p>Качественная и стильная одежда для современного мужчины</p>
-      <a href="#products" class="hero-btn">Посмотреть товары</a>
-    </div>
+    <article class="hero-content">
+      <h1>브랜드 오리지널 상품</h1>
+      <p>깔끔한 디자인, 믿을 수 있는 품질. 데일리 무드에 잘 어울리는 남성용 기본템만 엄선했습니다.</p>
+    </article>
   </section>
 
-  <section class="products" id="products">
-    <div class="container">
-      <h2 id="products-title">Популярные товары</h2>
-      <div class="product-grid" id="product-grid">
-        <!-- Products will be populated by JavaScript -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Product Detail Modal -->
-  <div class="modal" id="product-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Детали товара</h3>
-        <button class="modal-close" onclick="closeModal('product-modal')">&times;</button>
-      </div>
-      <div class="modal-body" id="product-modal-body">
-        <!-- Product details will be populated by JavaScript -->
-      </div>
-      <div class="modal-footer">
-        <div class="cart-total" id="modal-total">Итого: ₽ 0</div>
-        <button class="checkout-btn" onclick="addToCartFromModal()">Добавить в корзину</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cart Modal -->
-  <div class="modal" id="cart-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Корзина</h3>
-        <button class="modal-close" onclick="closeModal('cart-modal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="cart-items">
-          <!-- Cart items will be populated by JavaScript -->
+  <section class="product-section" id="tops">
+    <h2>상의</h2>
+    <div class="products-grid" id="productsGrid">
+      <article class="card" data-name="오버사이즈 티셔츠">
+        <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80" alt="오버사이즈 티셔츠">
+        <div class="card-body">
+          <h3 class="card-title">오버사이즈 티셔츠</h3>
+          <p class="card-text">부드러운 코튼, 편안한 루즈핏.</p>
+          <p class="card-price">₩27,000</p>
+          <button>장바구니에 담기</button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <div class="cart-total" id="cart-total">Итого: ₽ 0</div>
-        <button class="checkout-btn" onclick="checkout()">Оформить заказ</button>
-      </div>
+      </article>
+      <article class="card" data-name="기본 라운드 티">
+        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80" alt="기본 라운드 티">
+        <div class="card-body">
+          <h3 class="card-title">기본 라운드 티</h3>
+          <p class="card-text">베이직한 색감, 매일 입기 좋아요.</p>
+          <p class="card-price">₩21,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬림핏 폴로 셔츠">
+        <img src="https://images.unsplash.com/photo-1495121605193-b116b5b9c6b9?auto=format&fit=crop&w=800&q=80" alt="슬림핏 폴로 셔츠">
+        <div class="card-body">
+          <h3 class="card-title">슬림핏 폴로 셔츠</h3>
+          <p class="card-text">모던한 데일리 스타일.</p>
+          <p class="card-price">₩32,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="테크니컬 반팔 티">
+        <img src="https://images.unsplash.com/photo-1503342452485-86c7f6a2f91d?auto=format&fit=crop&w=800&q=80" alt="테크니컬 반팔 티">
+        <div class="card-body">
+          <h3 class="card-title">테크니컬 반팔 티</h3>
+          <p class="card-text">흡습속건 기능성 소재로 쾌적함.</p>
+          <p class="card-price">₩38,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
     </div>
-  </div>
+  </section>
 
-  <footer>
-    <div class="container">
-      <p>&copy; 2026 Мужская одежда. Все права защищены.</p>
+  <section class="product-section" id="bottoms">
+    <h2>하의</h2>
+    <div class="products-grid">
+      <article class="card" data-name="와이드 코튼 팬츠">
+        <img src="https://images.unsplash.com/photo-1583422407696-c9f4ddf5b323?auto=format&fit=crop&w=800&q=80" alt="와이드 코튼 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">와이드 코튼 팬츠</h3>
+          <p class="card-text">편안하고 트렌디한 실루엣.</p>
+          <p class="card-price">₩35,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="테크 팬츠">
+        <img src="https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80" alt="테크 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">테크 팬츠</h3>
+          <p class="card-text">신축성 좋은 소재, 가벼운 착용감.</p>
+          <p class="card-price">₩41,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬림핏 조거팬츠">
+        <img src="https://images.unsplash.com/photo-1562690868-6aa18ee5382f?auto=format&fit=crop&w=800&q=80" alt="슬림핏 조거팬츠">
+        <div class="card-body">
+          <h3 class="card-title">슬림핏 조거팬츠</h3>
+          <p class="card-text">일상과 운동 모두 가능한 디자인.</p>
+          <p class="card-price">₩39,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="데님 컷팅 팬츠">
+        <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80" alt="데님 컷팅 팬츠">
+        <div class="card-body">
+          <h3 class="card-title">데님 컷팅 팬츠</h3>
+          <p class="card-text">캐주얼 무드를 더하는 코튼 데님.</p>
+          <p class="card-price">₩49,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
     </div>
-  </footer>
+  </section>
+
+  <section class="product-section" id="outer">
+    <h2>아우터</h2>
+    <div class="products-grid">
+      <article class="card" data-name="스트레치 윈드브레이커">
+        <img src="https://images.unsplash.com/photo-1511376777868-611b54f68947?auto=format&fit=crop&w=800&q=80" alt="스트레치 윈드브레이커">
+        <div class="card-body">
+          <h3 class="card-title">스트레치 윈드브레이커</h3>
+          <p class="card-text">방풍 기능이 뛰어난 경량 재킷.</p>
+          <p class="card-price">₩76,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="다운 패딩 자켓">
+        <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=800&q=80" alt="다운 패딩 자켓">
+        <div class="card-body">
+          <h3 class="card-title">다운 패딩 자켓</h3>
+          <p class="card-text">보온성이 좋은 겨울용 패딩.</p>
+          <p class="card-price">₩119,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="후드 집업 재킷">
+        <img src="https://images.unsplash.com/photo-1542060746-81f37c7f3fb0?auto=format&fit=crop&w=800&q=80" alt="후드 집업 재킷">
+        <div class="card-body">
+          <h3 class="card-title">후드 집업 재킷</h3>
+          <p class="card-text">편안한 데일리 무드 후드웨어.</p>
+          <p class="card-price">₩89,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="울 트랙 재킷">
+        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" alt="울 트랙 재킷">
+        <div class="card-body">
+          <h3 class="card-title">울 트랙 재킷</h3>
+          <p class="card-text">부드러운 텍스처와 세련된 라인.</p>
+          <p class="card-price">₩95,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="product-section" id="shoes">
+    <h2>신발</h2>
+    <div class="products-grid">
+      <article class="card" data-name="쿠셔닝 러닝화">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" alt="쿠셔닝 러닝화">
+        <div class="card-body">
+          <h3 class="card-title">쿠셔닝 러닝화</h3>
+          <p class="card-text">경량 트레이닝, 뛰어난 그립감.</p>
+          <p class="card-price">₩89,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="오리지널 스니커즈">
+        <img src="https://images.unsplash.com/photo-1528701800489-20c72d1c79a2?auto=format&fit=crop&w=800&q=80" alt="오리지널 스니커즈">
+        <div class="card-body">
+          <h3 class="card-title">오리지널 스니커즈</h3>
+          <p class="card-text">캐주얼, 데일리 스타일에 이상적.</p>
+          <p class="card-price">₩74,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="하이탑 바스켓볼화">
+        <img src="https://images.unsplash.com/photo-1519741495080-554126f2eb49?auto=format&fit=crop&w=800&q=80" alt="하이탑 바스켓볼화">
+        <div class="card-body">
+          <h3 class="card-title">하이탑 바스켓볼화</h3>
+          <p class="card-text">스포츠 퍼포먼스에 최적화.</p>
+          <p class="card-price">₩106,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="라이프스타일 슬립온">
+        <img src="https://images.unsplash.com/photo-1528701800489-20c72d1c79a2?auto=format&fit=crop&w=800&q=80" alt="라이프스타일 슬립온">
+        <div class="card-body">
+          <h3 class="card-title">라이프스타일 슬립온</h3>
+          <p class="card-text">간편함과 스타일을 모두 갖춘 슈즈.</p>
+          <p class="card-price">₩68,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="product-section" id="bags">
+    <h2>가방</h2>
+    <div class="products-grid">
+      <article class="card" data-name="미니멀 숄더백">
+        <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80" alt="미니멀 숄더백">
+        <div class="card-body">
+          <h3 class="card-title">미니멀 숄더백</h3>
+          <p class="card-text">데일리 소지품을 위한 경량 디자인.</p>
+          <p class="card-price">₩34,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="스포티 토트백">
+        <img src="https://images.unsplash.com/photo-1582719478644-4e3bbd1ca2d1?auto=format&fit=crop&w=800&q=80" alt="스포티 토트백">
+        <div class="card-body">
+          <h3 class="card-title">스포티 토트백</h3>
+          <p class="card-text">넉넉한 수납과 활동성을 겸비.</p>
+          <p class="card-price">₩42,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="멀티 수납 백팩">
+        <img src="https://images.unsplash.com/photo-1574180045827-681f8a1a9622?auto=format&fit=crop&w=800&q=80" alt="멀티 수납 백팩">
+        <div class="card-body">
+          <h3 class="card-title">멀티 수납 백팩</h3>
+          <p class="card-text">여러 지퍼 포켓으로 깔끔한 정리.</p>
+          <p class="card-price">₩59,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+      <article class="card" data-name="슬링 크로스백">
+        <img src="https://images.unsplash.com/photo-1514986888952-8cd320577b25?auto=format&fit=crop&w=800&q=80" alt="슬링 크로스백">
+        <div class="card-body">
+          <h3 class="card-title">슬링 크로스백</h3>
+          <p class="card-text">가볍고 빠르게 여닫기 좋은 사이즈.</p>
+          <p class="card-price">₩38,000</p>
+          <button>장바구니에 담기</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer><p>© 2026 오리지날 맨즈. 모든 권리 보유.</p></footer>
 
   <script>
-    // Product data - 4 items per category (20 total)
-    const products = [
-      // Верхняя одежда (Tops) - 4 items
-      {
-        id: 1,
-        category: 'tops',
-        title: 'Базовая футболка с круглым вырезом',
-        price: 2500,
-        image: 'https://image.msscdn.net/images/goods_img/20220113/2324645/2324645_1_500.jpg',
-        description: 'Удобная базовая футболка из хлопка премиум качества. Идеально подходит для повседневного ношения.'
-      },
-      {
-        id: 2,
-        category: 'tops',
-        title: 'Лонгслив с высоким воротником',
-        price: 3200,
-        image: 'https://image.msscdn.net/images/goods_img/20220107/2318477/2318477_1_500.jpg',
-        description: 'Стильный лонгслив с высоким воротником. Отличный выбор для создания многослойных образов.'
-      },
-      {
-        id: 3,
-        category: 'tops',
-        title: 'Классическая рубашка в клетку',
-        price: 4500,
-        image: 'https://image.msscdn.net/images/goods_img/20211229/2309827/2309827_1_500.jpg',
-        description: 'Классическая рубашка в клетку из качественного хлопка. Универсальный элемент гардероба.'
-      },
-      {
-        id: 4,
-        category: 'tops',
-        title: 'Толстовка с капюшоном',
-        price: 5800,
-        image: 'https://image.msscdn.net/images/goods_img/20220111/2322459/2322459_1_500.jpg',
-        description: 'Удобная толстовка с капюшоном из мягкого флиса. Идеальна для casual стиля.'
-      },
-
-      // Нижняя одежда (Bottoms) - 4 items
-      {
-        id: 5,
-        category: 'bottoms',
-        title: 'Темные джинсы slim fit',
-        price: 6200,
-        image: 'https://image.msscdn.net/images/goods_img/20220112/2323456/2323456_1_500.jpg',
-        description: 'Классические темные джинсы slim fit. Комфортная посадка и отличное качество материала.'
-      },
-      {
-        id: 6,
-        category: 'bottoms',
-        title: 'Хлопковые брюки чинос',
-        price: 4800,
-        image: 'https://image.msscdn.net/images/goods_img/20220110/2321789/2321789_1_500.jpg',
-        description: 'Удобные брюки чинос из натурального хлопка. Отличный выбор для офиса и отдыха.'
-      },
-      {
-        id: 7,
-        category: 'bottoms',
-        title: 'Джоггеры спортивного стиля',
-        price: 4200,
-        image: 'https://image.msscdn.net/images/goods_img/20220108/2319678/2319678_1_500.jpg',
-        description: 'Модные джоггеры спортивного кроя. Комфорт и стиль в одном изделии.'
-      },
-      {
-        id: 8,
-        category: 'bottoms',
-        title: 'Классические брюки',
-        price: 5500,
-        image: 'https://image.msscdn.net/images/goods_img/20220106/2317567/2317567_1_500.jpg',
-        description: 'Элегантные классические брюки. Идеальны для деловых встреч и официальных мероприятий.'
-      },
-
-      // Верхняя одежда (Outer) - 4 items
-      {
-        id: 9,
-        category: 'outer',
-        title: 'Легкая ветровка',
-        price: 8900,
-        image: 'https://image.msscdn.net/images/goods_img/20220114/2325678/2325678_1_500.jpg',
-        description: 'Легкая и практичная ветровка. Защищает от ветра и легкого дождя.'
-      },
-      {
-        id: 10,
-        category: 'outer',
-        title: 'Классическое пальто',
-        price: 15800,
-        image: 'https://image.msscdn.net/images/goods_img/20220109/2320897/2320897_1_500.jpg',
-        description: 'Элегантное классическое пальто из натуральной шерсти. Роскошный вид и комфорт.'
-      },
-      {
-        id: 11,
-        category: 'outer',
-        title: 'Бомбер утепленный',
-        price: 12400,
-        image: 'https://image.msscdn.net/images/goods_img/20220105/2316789/2316789_1_500.jpg',
-        description: 'Стильный утепленный бомбер. Современный дизайн и отличная защита от холода.'
-      },
-      {
-        id: 12,
-        category: 'outer',
-        title: 'Кожаная куртка',
-        price: 18900,
-        image: 'https://image.msscdn.net/images/goods_img/20220103/2314567/2314567_1_500.jpg',
-        description: 'Классическая кожаная куртка. Вневременной стиль и премиум качество.'
-      },
-
-      // Обувь (Shoes) - 4 items
-      {
-        id: 13,
-        category: 'shoes',
-        title: 'Белые кроссовки',
-        price: 7500,
-        image: 'https://image.msscdn.net/images/goods_img/20220115/2326789/2326789_1_500.jpg',
-        description: 'Классические белые кроссовки. Универсальный выбор для любого образа.'
-      },
-      {
-        id: 14,
-        category: 'shoes',
-        title: 'Черные дерби',
-        price: 9200,
-        image: 'https://image.msscdn.net/images/goods_img/20220113/2324567/2324567_1_500.jpg',
-        description: 'Элегантные черные дерби из натуральной кожи. Идеальны для официальных случаев.'
-      },
-      {
-        id: 15,
-        category: 'shoes',
-        title: 'Спортивные кроссовки',
-        price: 6800,
-        image: 'https://image.msscdn.net/images/goods_img/20220111/2322345/2322345_1_500.jpg',
-        description: 'Комфортные спортивные кроссовки. Отличная амортизация и поддержка стопы.'
-      },
-      {
-        id: 16,
-        category: 'shoes',
-        title: 'Коричневые ботинки',
-        price: 11800,
-        image: 'https://image.msscdn.net/images/goods_img/20220107/2319876/2319876_1_500.jpg',
-        description: 'Стильные коричневые ботинки. Комбинируйте с джинсами или брюками.'
-      },
-
-      // Аксессуары (Bags) - 4 items
-      {
-        id: 17,
-        category: 'bags',
-        title: 'Кожаный ремень',
-        price: 3800,
-        image: 'https://image.msscdn.net/images/goods_img/20220116/2327890/2327890_1_500.jpg',
-        description: 'Классический кожаный ремень. Универсальный аксессуар для любого стиля.'
-      },
-      {
-        id: 18,
-        category: 'bags',
-        title: 'Миниатюрный рюкзак',
-        price: 5200,
-        image: 'https://image.msscdn.net/images/goods_img/20220114/2325678/2325678_1_500.jpg',
-        description: 'Компактный рюкзак для повседневного использования. Функциональный и стильный.'
-      },
-      {
-        id: 19,
-        category: 'bags',
-        title: 'Кожаный кошелек',
-        price: 2900,
-        image: 'https://image.msscdn.net/images/goods_img/20220112/2323456/2323456_1_500.jpg',
-        description: 'Практичный кожаный кошелек. Достаточно места для карт и наличных.'
-      },
-      {
-        id: 20,
-        category: 'bags',
-        title: 'Солнцезащитные очки',
-        price: 4500,
-        image: 'https://image.msscdn.net/images/goods_img/20220110/2321234/2321234_1_500.jpg',
-        description: 'Стильные солнцезащитные очки. Защищают глаза и дополняют образ.'
-      }
-    ];
-
-    let cart = [];
-    let currentProduct = null;
-    let currentFilter = 'all';
-    let searchQuery = '';
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-      renderProducts();
-      updateCartCount();
-
-      // Search on Enter key
-      document.getElementById('search-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          searchProducts();
-        }
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      const term = searchInput.value.trim().toLowerCase();
+      document.querySelectorAll('.card').forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        card.style.display = name.includes(term) ? '' : 'none';
       });
-    });
-
-    // Mobile menu functions
-    function toggleMobileMenu() {
-      const menu = document.getElementById('mobile-menu');
-      const overlay = document.getElementById('mobile-overlay');
-      const hamburger = document.querySelector('.hamburger');
-
-      menu.classList.toggle('active');
-      overlay.classList.toggle('active');
-      hamburger.classList.toggle('active');
-    }
-
-    function closeMobileMenu() {
-      const menu = document.getElementById('mobile-menu');
-      const overlay = document.getElementById('mobile-overlay');
-      const hamburger = document.querySelector('.hamburger');
-
-      menu.classList.remove('active');
-      overlay.classList.remove('active');
-      hamburger.classList.remove('active');
-    }
-
-    // Filter products
-    function filterProducts(category) {
-      currentFilter = category;
-      searchQuery = '';
-
-      // Update active category links
-      document.querySelectorAll('.category-link').forEach(link => {
-        link.classList.remove('active');
-      });
-      document.querySelectorAll(`[onclick*="filterProducts('${category}')"]`).forEach(link => {
-        link.classList.add('active');
-      });
-
-      renderProducts();
-      updateProductsTitle();
-    }
-
-    // Search products
-    function searchProducts() {
-      const query = document.getElementById('search-input').value.toLowerCase().trim();
-      searchQuery = query;
-      currentFilter = 'all';
-
-      // Clear active category
-      document.querySelectorAll('.category-link').forEach(link => {
-        link.classList.remove('active');
-      });
-
-      renderProducts();
-      updateProductsTitle();
-    }
-
-    // Update products title
-    function updateProductsTitle() {
-      const title = document.getElementById('products-title');
-      if (searchQuery) {
-        title.textContent = `Результаты поиска: "${searchQuery}"`;
-      } else if (currentFilter !== 'all') {
-        const categoryNames = {
-          'tops': 'Верхняя одежда',
-          'bottoms': 'Нижняя одежда',
-          'outer': 'Верхняя одежда',
-          'shoes': 'Обувь',
-          'bags': 'Аксессуары'
-        };
-        title.textContent = categoryNames[currentFilter] || 'Популярные товары';
-      } else {
-        title.textContent = 'Популярные товары';
-      }
-    }
-
-    // Render products
-    function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      let filteredProducts = products;
-
-      // Apply category filter
-      if (currentFilter !== 'all') {
-        filteredProducts = filteredProducts.filter(p => p.category === currentFilter);
-      }
-
-      // Apply search filter
-      if (searchQuery) {
-        filteredProducts = filteredProducts.filter(p =>
-          p.title.toLowerCase().includes(searchQuery) ||
-          p.description.toLowerCase().includes(searchQuery)
-        );
-      }
-
-      if (filteredProducts.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; grid-column: 1 / -1; padding: 40px; color: var(--text-muted);">Товары не найдены</p>';
-        return;
-      }
-
-      grid.innerHTML = filteredProducts.map(product => `
-        <div class="product-card">
-          <div class="product-image" onclick="openProductModal(${product.id})">
-            <img src="${product.image}" alt="${product.title}" loading="lazy">
-          </div>
-          <div class="product-info">
-            <h3 class="product-title">${product.title}</h3>
-            <p class="product-price">₽ ${product.price.toLocaleString()}</p>
-            <button class="product-btn" onclick="addToCart(${product.id})">Добавить в корзину</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Open product modal
-    function openProductModal(productId) {
-      currentProduct = products.find(p => p.id === productId);
-      if (!currentProduct) return;
-
-      const modal = document.getElementById('product-modal');
-      const body = document.getElementById('product-modal-body');
-
-      body.innerHTML = `
-        <div class="product-detail-image">
-          <img src="${currentProduct.image}" alt="${currentProduct.title}">
-        </div>
-        <h3 class="product-detail-title">${currentProduct.title}</h3>
-        <p class="product-detail-price">₽ ${currentProduct.price.toLocaleString()}</p>
-        <p class="product-detail-description">${currentProduct.description}</p>
-        <div class="quantity-controls">
-          <button class="quantity-btn" onclick="changeQuantity(-1)">-</button>
-          <input type="number" class="quantity-input" id="modal-quantity" value="1" min="1" max="99">
-          <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
-        </div>
-      `;
-
-      updateModalTotal();
-      modal.classList.add('active');
-      closeMobileMenu();
-    }
-
-    // Change quantity
-    function changeQuantity(delta) {
-      const input = document.getElementById('modal-quantity');
-      let quantity = parseInt(input.value) + delta;
-      quantity = Math.max(1, Math.min(99, quantity));
-      input.value = quantity;
-      updateModalTotal();
-    }
-
-    // Update modal total
-    function updateModalTotal() {
-      const quantity = parseInt(document.getElementById('modal-quantity').value);
-      const total = currentProduct ? currentProduct.price * quantity : 0;
-      document.getElementById('modal-total').textContent = `Итого: ₽ ${total.toLocaleString()}`;
-    }
-
-    // Add to cart from modal
-    function addToCartFromModal() {
-      const quantity = parseInt(document.getElementById('modal-quantity').value);
-      addToCart(currentProduct.id, quantity);
-      closeModal('product-modal');
-    }
-
-    // Add to cart
-    function addToCart(productId, quantity = 1) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-
-      const existingItem = cart.find(item => item.id === productId);
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        cart.push({
-          id: product.id,
-          title: product.title,
-          price: product.price,
-          quantity: quantity,
-          image: product.image
-        });
-      }
-
-      updateCartCount();
-      showNotification(`${product.title} добавлен в корзину!`);
-    }
-
-    // Update cart count
-    function updateCartCount() {
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-      document.getElementById('cart-count').textContent = count;
-    }
-
-    // Open cart
-    function openCart() {
-      const modal = document.getElementById('cart-modal');
-      const itemsContainer = document.getElementById('cart-items');
-
-      if (cart.length === 0) {
-        itemsContainer.innerHTML = '<p>Корзина пуста</p>';
-      } else {
-        itemsContainer.innerHTML = cart.map(item => `
-          <div class="cart-item">
-            <div class="cart-item-image">
-              <img src="${item.image}" alt="${item.title}">
-            </div>
-            <div class="cart-item-info">
-              <h4 class="cart-item-title">${item.title}</h4>
-              <p class="cart-item-price">₽ ${item.price.toLocaleString()} × ${item.quantity}</p>
-              <div class="cart-item-controls">
-                <button onclick="updateCartItem(${item.id}, ${item.quantity - 1})">-</button>
-                <span>${item.quantity}</span>
-                <button onclick="updateCartItem(${item.id}, ${item.quantity + 1})">+</button>
-                <button onclick="removeFromCart(${item.id})" style="margin-left: 10px; color: var(--danger);">Удалить</button>
-              </div>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      updateCartTotal();
-      modal.classList.add('active');
-      closeMobileMenu();
-    }
-
-    // Update cart item
-    function updateCartItem(productId, newQuantity) {
-      if (newQuantity <= 0) {
-        removeFromCart(productId);
-        return;
-      }
-
-      const item = cart.find(item => item.id === productId);
-      if (item) {
-        item.quantity = newQuantity;
-        updateCartCount();
-        openCart(); // Refresh cart modal
-      }
-    }
-
-    // Remove from cart
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      updateCartCount();
-      openCart(); // Refresh cart modal
-    }
-
-    // Update cart total
-    function updateCartTotal() {
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      document.getElementById('cart-total').textContent = `Итого: ₽ ${total.toLocaleString()}`;
-    }
-
-    // Checkout
-    function checkout() {
-      if (cart.length === 0) {
-        showNotification('Корзина пуста!');
-        return;
-      }
-
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      showNotification(`Заказ оформлен! Сумма: ₽ ${total.toLocaleString()}`);
-      cart = [];
-      updateCartCount();
-      closeModal('cart-modal');
-    }
-
-    // Close modal
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    // Show notification
-    function showNotification(message) {
-      // Simple notification - you can enhance this
-      alert(message);
-    }
-
-    // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('active');
-      }
     });
   </script>
 </body>
