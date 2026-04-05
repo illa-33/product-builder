@@ -1126,7 +1126,10 @@
     }
 
     function addNewProduct() {
-      const titleUrl = document.getElementById('new-image').value.trim();
+      const title = document.getElementById('new-title').value.trim();
+      const price = Number(document.getElementById('new-price').value);
+      const color = document.getElementById('new-color').value.trim();
+      const imageUrl = document.getElementById('new-image').value.trim();
       const imageFile = document.getElementById('new-image-file').files;
       const colorsInput = document.getElementById('new-colors').value.trim();
       const sizesInput = document.getElementById('new-sizes').value.trim();
@@ -1166,16 +1169,7 @@
         images,
         options: { colors, sizes }
       });
-      saveProducts(products
-      }
-      const maxId = products.reduce((max, item) => Math.max(max, item.id), 0);
-      products.push({ id: maxId + 1, category, title, price, color, image });
-      renderProducts();
-      showNotification('Товар добавлен');
-      renderAccountModal();
-    }
-
-    function deleteUser(username) {
+      saveProducts(products);
       const users = getUsers().filter(user => user.username !== username);
       saveUsers(users);
       showNotification('Пользователь удалён');
