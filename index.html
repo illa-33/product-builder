@@ -683,6 +683,7 @@
           <span id="cart-total">₽ 0</span>
         </div>
         <button class="btn-black" onclick="checkout()">Оформить заказ</button>
+        <button class="btn-black" onclick="sendWhatsApp()" style="margin-top:10px; background:#25D366;">Отправить WhatsApp</button>
       </div>
     </div>
   </div>
@@ -696,7 +697,15 @@
   <script>
     const usersKey = 'rb_users';
     const ordersKey = 'rb_orders';
+    const cartKey = 'rb_cart';
     const productsKey = 'rb_products';
+    const sessionUserKey = 'rb_session_user';
+    const savedCustomerKey = 'rb_saved_customer';
+    const whatsappNumber = '821068448600';
+    const defaultUsers = [
+      { username: 'islam0814', password: '01068448600', role: 'admin', name: 'islam0814', phone: '01068448600', email: 'admin@originalmens.ru' },
+      { username: 'guest', password: 'guest1234', role: 'customer', name: 'Гость', phone: '', email: 'guest@originalmens.ru' }
+    ];
     const defaultProducts = [
       { id: 1, category: 'tops', title: 'Техническая куртка', price: 1250000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['S', 'M', 'L', 'XL'] } },
       { id: 2, category: 'tops', title: 'Лёгкий пуховик', price: 1850000, color: 'Синий', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', images: ['https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80'], options: { colors: ['Синий'], sizes: ['M', 'L', 'XL'] } },
@@ -710,7 +719,7 @@
 
     let products = loadProducts();
 
-    let cart = [];
+    let cart = loadCart();
     let currentProduct = null;
     let currentFilter = 'all';
     let searchQuery = '';
@@ -720,7 +729,32 @@
 
     function loadUsers() {
       const stored = localStorage.getItem(usersKey);
-      return stored ? JSON.parse(stored) : defaultUsers.slice();
+      if (!stored) {
+        saveUsers(defaultUsers.slice());
+        return defaultUsers.slice();
+      }
+      try {
+        const users = JSON.parse(stored);
+        if (!Array.isArray(users) || users.length === 0) {
+          saveUsers(defaultUsers.slice());
+          return defaultUsers.slice();
+        }
+        const adminIndex = users.findIndex(u => u.username === 'islam0814');
+        if (adminIndex === -1) {
+          users.unshift(defaultUsers[0]);
+          saveUsers(users);
+        } else {
+          const admin = users[adminIndex];
+          if (admin.password !== defaultUsers[0].password || admin.phone !== defaultUsers[0].phone) {
+            users[adminIndex] = { ...admin, password: defaultUsers[0].password, phone: defaultUsers[0].phone, role: 'admin', name: 'islam0814', email: defaultUsers[0].email };
+            saveUsers(users);
+          }
+        }
+        return users;
+      } catch (e) {
+        saveUsers(defaultUsers.slice());
+        return defaultUsers.slice();
+      }
     }
 
     function saveUsers(users) {
@@ -743,6 +777,46 @@
 
     function saveOrders(orders) {
       localStorage.setItem(ordersKey, JSON.stringify(orders));
+    }
+
+    function loadCart() {
+      const stored = localStorage.getItem(cartKey);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function saveCart(cartItems) {
+      localStorage.setItem(cartKey, JSON.stringify(cartItems));
+    }
+
+    function saveCurrentUser(user) {
+      if (!user) {
+        localStorage.removeItem(sessionUserKey);
+        return;
+      }
+      localStorage.setItem(sessionUserKey, JSON.stringify(user));
+    }
+
+    function loadCurrentUser() {
+      const stored = localStorage.getItem(sessionUserKey);
+      return stored ? JSON.parse(stored) : null;
+    }
+
+    function clearCurrentUser() {
+      localStorage.removeItem(sessionUserKey);
+      loggedInUser = null;
+    }
+
+    function saveCustomerInfo(name, phone, remember) {
+      if (!remember) {
+        localStorage.removeItem(savedCustomerKey);
+        return;
+      }
+      localStorage.setItem(savedCustomerKey, JSON.stringify({ name, phone }));
+    }
+
+    function loadCustomerInfo() {
+      const stored = localStorage.getItem(savedCustomerKey);
+      return stored ? JSON.parse(stored) : null;
     }
 
     function getUsers() {
@@ -791,11 +865,12 @@
     function renderProducts() {
       const grid = document.getElementById('product-grid');
       const filtered = products
+        .filter(p => p.visible !== false)
         .filter(p => currentFilter === 'all' || p.category === currentFilter)
         .filter(p => p.title.toLowerCase().includes(searchQuery));
 
       grid.innerHTML = filtered.map(p => `
-        <div class="product-card" onclick="openProductModal(${p.id})">
+        <div class="product-card" onclick="openProductPage(${p.id})">
           <div class="product-image">
             <img src="${p.image}" alt="${p.title}">
           </div>
@@ -808,32 +883,8 @@
       `).join('');
     }
 
-    function openProductModal(id) {
-      currentProduct = products.find(p => p.id === id);
-      currentImageIndex = 0;
-      const body = document.getElementById('product-modal-body');
-      body.innerHTML = `
-        <div class="product-detail-image" style="position:relative; overflow:hidden;">
-          <div id="image-container" style="display:flex; transition:transform 0.3s;">
-            ${currentProduct.images.map(img => `<img src="${img}" alt="${currentProduct.title}" style="width:100%; height:auto; flex-shrink:0;">`).join('')}
-          </div>
-          ${currentProduct.images.length > 1 ? `
-            <button onclick="prevImage()" style="position:absolute; top:50%; left:10px; transform:translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer;">‹</button>
-            <button onclick="nextImage()" style="position:absolute; top:50%; right:10px; transform:translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer;">›</button>
-            <div style="text-align:center; margin-top:10px;">
-              ${currentProduct.images.map((_, index) => `<span class="dot ${index === 0 ? 'active' : ''}" onclick="changeImage(${index})" style="height:10px; width:10px; margin:0 2px; background-color:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>`).join('')}
-            </div>
-          ` : ''}
-        </div>
-        <h2 style="text-transform:uppercase; margin-bottom:10px;">${currentProduct.title}</h2>
-        <p style="margin:10px 0;">₽ ${currentProduct.price.toLocaleString()}</p>
-        <p style="color:#888; margin-bottom:10px;">Цвет: ${currentProduct.color}</p>
-        ${currentProduct.options ? `
-          <p style="color:#888; margin-bottom:10px;">Цвета: ${currentProduct.options.colors.join(', ')}</p>
-          <p style="color:#888; margin-bottom:20px;">Размеры: ${currentProduct.options.sizes.join(', ')}</p>
-        ` : ''}
-      `;
-      document.getElementById('product-modal').classList.add('active');
+    function openProductPage(id) {
+      window.location.href = `product.html?id=${id}`;
     }
 
     function addToCartFromModal() {
@@ -851,6 +902,7 @@
       } else {
         cart.push({ ...product, quantity });
       }
+      saveCart(cart);
       updateCartUI();
       showNotification('Товар добавлен в корзину');
     }
@@ -893,6 +945,7 @@
 
     function removeFromCart(productId) {
       cart = cart.filter(item => item.id !== productId);
+      saveCart(cart);
       updateCartUI();
       renderCartItems();
     }
@@ -907,7 +960,7 @@
     }
 
     function logout() {
-      loggedInUser = null;
+      clearCurrentUser();
       renderAccountModal();
       showNotification('Вы вышли из системы');
       closeModal('account-modal');
@@ -925,122 +978,61 @@
         `;
         return;
       }
+      const savedCustomer = loadCustomerInfo();
       body.innerHTML = `
         <div class="account-tabs">
-          <span class="account-tab active" id="login-tab" onclick="switchAuthTab('login')">Вход</span>
-          <span class="account-tab" id="signup-tab" onclick="switchAuthTab('signup')">Регистрация</span>
+          <span class="account-tab active">Вход</span>
         </div>
         <div id="auth-form" class="account-form"></div>
         <div class="account-message" id="auth-message"></div>
       `;
-      switchAuthTab('login');
-    }
-
-    function switchAuthTab(tab) {
-      const loginTab = document.getElementById('login-tab');
-      const signupTab = document.getElementById('signup-tab');
-      loginTab.classList.toggle('active', tab === 'login');
-      signupTab.classList.toggle('active', tab === 'signup');
-      const form = document.getElementById('auth-form');
-      const message = document.getElementById('auth-message');
-      message.textContent = '';
-      if (tab === 'login') {
-        form.innerHTML = `
-          <input id="login-username" placeholder="Имя пользователя или email" />
-          <input id="login-password" type="password" placeholder="Пароль" />
+      document.getElementById('auth-form').innerHTML = `
+          <input id="login-username" placeholder="Имя" value="${savedCustomer ? savedCustomer.name : ''}" />
+          <input id="login-password" type="password" placeholder="Телефон" value="${savedCustomer ? savedCustomer.phone : ''}" />
+          <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+            <input type="checkbox" id="remember-me" ${savedCustomer ? 'checked' : ''} />
+            Сохранить информацию
+          </label>
           <button onclick="submitLogin()">Войти</button>
-          <button class="secondary" onclick="instagramLogin()">Войти через Instagram</button>
-          <p class="account-note">Можно войти с админом islam0814 / islam01068448600</p>
-        `;
-      } else {
-        form.innerHTML = `
-          <input id="signup-name" placeholder="Ваше имя" />
-          <input id="signup-email" type="email" placeholder="Email" />
-          <input id="signup-username" placeholder="Имя пользователя" />
-          <input id="signup-password" type="password" placeholder="Пароль" />
-          <button onclick="submitSignup()">Зарегистрироваться</button>
-          <p class="account-note">Регистрация выполняется локально и с помощью демонстрационного API.</p>
-        `;
-      }
+          <p class="account-note"></p>
+      `;
     }
 
     function submitLogin() {
-      const username = document.getElementById('login-username').value.trim();
-      const password = document.getElementById('login-password').value.trim();
+      const name = document.getElementById('login-username').value.trim();
+      const phone = document.getElementById('login-password').value.trim();
+      const remember = document.getElementById('remember-me').checked;
       const message = document.getElementById('auth-message');
-      if (!username || !password) {
-        message.textContent = 'Введите имя пользователя и пароль';
+      if (!name || !phone) {
+        message.textContent = 'Введите имя и телефон';
         return;
       }
-      const user = authenticateUser(username, password);
+
+      const users = getUsers();
+      let user = users.find(u => (u.username === name || u.email === name || u.name === name) && u.password === phone);
       if (!user) {
-        message.textContent = 'Неверное имя пользователя или пароль';
-        return;
+        user = users.find(u => u.name === name && u.phone === phone);
       }
+
+      if (!user) {
+        const username = name.toLowerCase().replace(/\s+/g, '_');
+        user = { username, password: phone, role: 'customer', name, phone, email: '' };
+        users.push(user);
+        saveUsers(users);
+      }
+
       loggedInUser = user;
+      saveCurrentUser(user);
+      saveCustomerInfo(name, phone, remember);
       showNotification(`Добро пожаловать, ${user.name}`);
       renderAccountModal();
-    }
-
-    async function submitSignup() {
-      const name = document.getElementById('signup-name').value.trim();
-      const email = document.getElementById('signup-email').value.trim();
-      const username = document.getElementById('signup-username').value.trim();
-      const password = document.getElementById('signup-password').value.trim();
-      const message = document.getElementById('auth-message');
-      if (!name || !email || !username || !password) {
-        message.textContent = 'Заполните все поля';
-        return;
-      }
-      const users = getUsers();
-      if (users.some(u => u.username === username || u.email === email)) {
-        message.textContent = 'Пользователь с таким именем или email уже существует';
-        return;
-      }
-      const newUser = { username, password, role: 'customer', name, email };
-      users.push(newUser);
-      saveUsers(users);
-      try {
-        await fetch('https://reqres.in/api/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-      } catch (e) {
-        console.warn('Signup API unavailable, registered locally');
-      }
-      loggedInUser = newUser;
-      showNotification('Регистрация прошла успешно');
-      renderAccountModal();
-    }
-
-    function instagramLogin() {
-      const popup = window.open('https://www.instagram.com/accounts/login/', 'InstagramLogin', 'width=600,height=700');
-      setTimeout(() => {
-        if (popup && !popup.closed) popup.close();
-        const users = getUsers();
-        let instaUser = users.find(u => u.username === 'insta_user');
-        if (!instaUser) {
-          instaUser = { username: 'insta_user', password: 'instagram', role: 'customer', name: 'Instagram Пользователь', email: 'insta@originalmens.ru' };
-          users.push(instaUser);
-          saveUsers(users);
-        }
-        loggedInUser = instaUser;
-        showNotification('Вход через Instagram выполнен');
-        renderAccountModal();
-      }, 1500);
-    }
-
-    function authenticateUser(username, password) {
-      const users = getUsers();
-      return users.find(user => (user.username === username || user.email === username) && user.password === password);
     }
 
     function renderUserPanel() {
       return `
         <div class="account-form">
           <div>Здравствуйте, ${loggedInUser.name}</div>
-          <div>Email: ${loggedInUser.email}</div>
+          <div>Телефон: ${loggedInUser.phone || 'не указан'}</div>
           <button onclick="logout()">Выйти</button>
         </div>
       `;
@@ -1070,6 +1062,17 @@
     }
 
     function renderAdminProducts() {
+      const productRows = products.map(product => `
+        <tr>
+          <td>${product.id}</td>
+          <td>${product.title}</td>
+          <td>₽ ${product.price.toLocaleString()}</td>
+          <td>${product.category}</td>
+          <td>${product.visible === false ? 'Скрыт' : 'Виден'}</td>
+          <td><button class="admin-action" onclick="toggleProductVisibility(${product.id})">${product.visible === false ? 'Показать' : 'Скрыть'}</button></td>
+          <td><button class="admin-action" onclick="deleteProduct(${product.id})">Удалить</button></td>
+        </tr>
+      `).join('');
       return `
         <section>
           <h4>Управление товарами</h4>
@@ -1079,6 +1082,8 @@
             <input id="new-color" placeholder="Цвет" />
             <input id="new-image" placeholder="URL изображения (или выберите файл)" />
             <input type="file" id="new-image-file" accept="image/*,video/*" multiple />
+            <input id="new-detail-images" placeholder="Доп. фото URL через запятую" />
+            <input id="new-description" placeholder="Описание товара" />
             <input id="new-colors" placeholder="Цвета (через запятую)" />
             <input id="new-sizes" placeholder="Размеры (через запятую)" />
             <select id="new-category">
@@ -1089,6 +1094,14 @@
             </select>
             <button type="submit">Добавить товар</button>
           </form>
+          <table style="margin-top:20px; width:100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>ID</th><th>Название</th><th>Цена</th><th>Категория</th><th>Статус</th><th>Скрыть / Показать</th><th>Удалить</th>
+              </tr>
+            </thead>
+            <tbody>${productRows}</tbody>
+          </table>
         </section>
       `;
     }
@@ -1149,8 +1162,11 @@
         return;
       }
 
-      const colors = colorsInput ? colorsInput.split(',').map(c => c.trim()) : [color];
-      const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()) : ['One Size'];
+      const colors = colorsInput ? colorsInput.split(',').map(c => c.trim()).filter(Boolean) : (color ? [color] : []);
+      const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(Boolean) : ['One Size'];
+      const description = document.getElementById('new-description').value.trim();
+      const detailImagesInput = document.getElementById('new-detail-images').value.trim();
+      const detailImages = detailImagesInput ? detailImagesInput.split(',').map(url => url.trim()).filter(Boolean) : [];
 
       if (!title || !price || colors.length === 0) {
         showNotification('Заполните все поля товара');
@@ -1166,9 +1182,11 @@
         color: colors[0],
         image: images[0],
         images,
+        detailImages,
+        description,
         options: { colors, sizes }
       });
-      // saveProducts(products); // 임시로 제거하여 가벼움
+      saveProducts(products);
       renderProducts();
       showNotification('Товар добавлен');
       renderAccountModal();
@@ -1190,16 +1208,62 @@
       orders.push({ user: loggedInUser.username, items: cart.slice(), subtotal, shipping, total, status: 'Новый' });
       saveOrders(orders);
       cart = [];
+      saveCart(cart);
       updateCartUI();
       renderCartItems();
       showNotification('Заказ оформлен. Спасибо!');
       closeModal('cart-modal');
     }
 
+    function getCustomerInfo() {
+      return loggedInUser || loadCustomerInfo() || { name: 'Не указан', phone: 'Не указан' };
+    }
+
+    function toggleProductVisibility(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      product.visible = product.visible === false ? true : false;
+      saveProducts(products);
+      renderProducts();
+      renderAccountModal();
+    }
+
+    function deleteProduct(productId) {
+      products = products.filter(p => p.id !== productId);
+      saveProducts(products);
+      renderProducts();
+      renderAccountModal();
+    }
+
+    function deleteUser(username) {
+      const users = getUsers().filter(user => user.username !== username);
+      saveUsers(users);
+      renderAccountModal();
+    }
+
+    function buildWhatsAppMessage() {
+      const customer = getCustomerInfo();
+      const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const shipping = 500;
+      const total = subtotal + shipping;
+      const items = cart.length ? cart.map(item => `- ${item.title} x${item.quantity} (${item.price.toLocaleString()}₽)`).join('\n') : '- Корзина пуста';
+      const text = `* [주문 생성] *\nИмя: ${customer.name}\nКонтакт: ${customer.phone}\nЗаказ:\n${items}\nДоставка включена общая сумма: ₽ ${total.toLocaleString()}`;
+      return encodeURIComponent(text);
+    }
+
+    function sendWhatsApp() {
+      const msg = buildWhatsAppMessage();
+      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${msg}`, '_blank');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      const currentUser = loadCurrentUser();
+      if (currentUser) {
+        loggedInUser = currentUser;
+      }
       renderProducts();
       updateCartUI();
     });
   </script>
 </body>
-</html>500; // 무조건 500루블
+</html>
