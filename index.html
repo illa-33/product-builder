@@ -578,7 +578,7 @@
       <div class="header-content">
         <div class="header-left">
           <button class="icon-btn hamburger" onclick="openSideMenu()">☰</button>
-          <a href="#" class="logo">ОРИГИНАЛ МЕНС</a>
+          <a href="#" class="logo">Really Brand</a>
         </div>
         <div class="header-right">
           <button class="icon-btn" onclick="toggleSearch()">🔍</button>
@@ -630,8 +630,8 @@
   <section class="hero">
     <img src="https://raw.githubusercontent.com/illa-33/product-builder/main/hero-image.jpg" alt="Original Mens">
     <div class="hero-content">
-      <h1>ОРИГИНАЛ МЕНС</h1>
-      <p>Стильная мужская одежда для любого повода.</p>
+      <h1></h1>
+      <p></p>
       <button class="btn-black" onclick="filterProducts('all'); closeSideMenu();">Посмотреть коллекцию</button>
     </div>
   </section>
@@ -716,6 +716,7 @@
     let searchQuery = '';
     let loggedInUser = null;
     let adminSection = 'products';
+    let currentImageIndex = 0;
 
     function loadUsers() {
       const stored = localStorage.getItem(usersKey);
@@ -810,11 +811,28 @@
     function openProductModal(id) {
       currentProduct = products.find(p => p.id === id);
       const body = document.getElementById('product-modal-body');
+      const imagesHtml = currentProduct.images.map((img, index) => `<img src="${img}" alt="${currentProduct.title}" style="width:100%; height:auto; display:${index === 0 ? 'block' : 'none'};">`).join('');
+      const dotsHtml = currentProduct.images.map((_, index) => `<span class="dot" onclick="changeImage(${index})" style="height:10px; width:10px; margin:0 2px; background-color:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>`).join('');
       body.innerHTML = `
-        <div class="product-detail-image"><img src="${currentProduct.image}" alt="${currentProduct.title}"></div>
+        <div class="product-detail-image" style="position:relative; overflow:hidden;">
+          <div id="image-container" style="display:flex; transition:transform 0.3s;">
+            ${currentProduct.images.map(img => `<img src="${img}" alt="${currentProduct.title}" style="width:100%; height:auto; flex-shrink:0;">`).join('')}
+          </div>
+          ${currentProduct.images.length > 1 ? `
+            <button onclick="prevImage()" style="position:absolute; top:50%; left:10px; transform:translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer;">‹</button>
+            <button onclick="nextImage()" style="position:absolute; top:50%; right:10px; transform:translateY(-50%); background:none; border:none; font-size:24px; cursor:pointer;">›</button>
+            <div style="text-align:center; margin-top:10px;">
+              ${currentProduct.images.map((_, index) => `<span class="dot ${index === 0 ? 'active' : ''}" onclick="changeImage(${index})" style="height:10px; width:10px; margin:0 2px; background-color:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
         <h2 style="text-transform:uppercase; margin-bottom:10px;">${currentProduct.title}</h2>
         <p style="margin:10px 0;">₽ ${currentProduct.price.toLocaleString()}</p>
-        <p style="color:#888; margin-bottom:20px;">Цвет: ${currentProduct.color}</p>
+        <p style="color:#888; margin-bottom:10px;">Цвет: ${currentProduct.color}</p>
+        ${currentProduct.options ? `
+          <p style="color:#888; margin-bottom:10px;">Цвета: ${currentProduct.options.colors.join(', ')}</p>
+          <p style="color:#888; margin-bottom:20px;">Размеры: ${currentProduct.options.sizes.join(', ')}</p>
+        ` : ''}
       `;
       document.getElementById('product-modal').classList.add('active');
     }
