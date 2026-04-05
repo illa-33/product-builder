@@ -450,6 +450,31 @@
       color: var(--text);
     }
 
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .remember-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .admin-add-header-btn {
+      border: 1px solid var(--text);
+      background: transparent;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
     .account-note {
       font-size: 13px;
       color: #666;
@@ -581,6 +606,7 @@
           <a href="#" class="logo">Really Brand</a>
         </div>
         <div class="header-right">
+          <button id="admin-add-header-btn" class="admin-add-header-btn" onclick="openAdminAddSection()">＋ Товар</button>
           <button class="icon-btn" onclick="toggleSearch()">🔍</button>
           <button class="icon-btn" onclick="openAccount()">👤</button>
           <button class="icon-btn cart-btn" onclick="openCart()">
@@ -628,7 +654,7 @@
   </div>
 
   <section class="hero">
-    <img src="https://raw.githubusercontent.com/illa-33/product-builder/main/hero-image.jpg" alt="Original Mens">
+    <img src="https://raw.githubusercontent.com/illa-33/product-builder/main/brand.png" alt="home">
     <div class="hero-content">
       <h1></h1>
       <p></p>
@@ -725,6 +751,7 @@
     let searchQuery = '';
     let loggedInUser = null;
     let adminSection = 'products';
+    let editingProductId = null;
     let currentImageIndex = 0;
 
     function loadUsers() {
@@ -976,8 +1003,10 @@
           </div>
           ${loggedInUser.role === 'admin' ? renderAdminPanel() : renderUserPanel()}
         `;
+        updateAdminHeaderButton();
         return;
       }
+      updateAdminHeaderButton();
       const savedCustomer = loadCustomerInfo();
       body.innerHTML = `
         <div class="account-tabs">
@@ -989,9 +1018,9 @@
       document.getElementById('auth-form').innerHTML = `
           <input id="login-username" placeholder="Имя" value="${savedCustomer ? savedCustomer.name : ''}" />
           <input id="login-password" type="password" placeholder="Телефон" value="${savedCustomer ? savedCustomer.phone : ''}" />
-          <label style="display:flex; align-items:center; gap:10px; font-size:14px;">
+          <label class="remember-row">
             <input type="checkbox" id="remember-me" ${savedCustomer ? 'checked' : ''} />
-            Сохранить информацию
+            <span>Сохранить информацию</span>
           </label>
           <button onclick="submitLogin()">Войти</button>
           <p class="account-note"></p>
@@ -1031,7 +1060,7 @@
     function renderUserPanel() {
       return `
         <div class="account-form">
-          <div>Здравствуйте, ${loggedInUser.name}</div>
+          <div>Имя: ${loggedInUser.name}</div>
           <div>Телефон: ${loggedInUser.phone || 'не указан'}</div>
           <button onclick="logout()">Выйти</button>
         </div>
@@ -1069,6 +1098,7 @@
           <td>₽ ${product.price.toLocaleString()}</td>
           <td>${product.category}</td>
           <td>${product.visible === false ? 'Скрыт' : 'Виден'}</td>
+          <td><button class="admin-action" onclick="editProduct(${product.id})">Изменить</button></td>
           <td><button class="admin-action" onclick="toggleProductVisibility(${product.id})">${product.visible === false ? 'Показать' : 'Скрыть'}</button></td>
           <td><button class="admin-action" onclick="deleteProduct(${product.id})">Удалить</button></td>
         </tr>
@@ -1092,7 +1122,8 @@
               <option value="shoes">Обувь</option>
               <option value="bags">Сумки</option>
             </select>
-            <button type="submit">Добавить товар</button>
+            <input type="hidden" id="edit-product-id" value="" />
+            <button type="submit">${editingProductId ? 'Сохранить изменения' : 'Добавить товар'}</button>
           </form>
           <table style="margin-top:20px; width:100%; border-collapse: collapse;">
             <thead>
@@ -1145,7 +1176,10 @@
       const imageFile = document.getElementById('new-image-file').files;
       const colorsInput = document.getElementById('new-colors').value.trim();
       const sizesInput = document.getElementById('new-sizes').value.trim();
+      const description = document.getElementById('new-description').value.trim();
+      const detailImagesInput = document.getElementById('new-detail-images').value.trim();
       const category = document.getElementById('new-category').value;
+      const editId = document.getElementById('edit-product-id').value;
 
       let images = [];
       if (imageUrl) {
@@ -1164,8 +1198,6 @@
 
       const colors = colorsInput ? colorsInput.split(',').map(c => c.trim()).filter(Boolean) : (color ? [color] : []);
       const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(Boolean) : ['One Size'];
-      const description = document.getElementById('new-description').value.trim();
-      const detailImagesInput = document.getElementById('new-detail-images').value.trim();
       const detailImages = detailImagesInput ? detailImagesInput.split(',').map(url => url.trim()).filter(Boolean) : [];
 
       if (!title || !price || colors.length === 0) {
@@ -1174,6 +1206,27 @@
       }
 
       const maxId = products.reduce((max, item) => Math.max(max, item.id), 0);
+      if (editId) {
+        const existingProduct = products.find(p => p.id === Number(editId));
+        if (existingProduct) {
+          existingProduct.title = title;
+          existingProduct.price = price;
+          existingProduct.color = colors[0];
+          existingProduct.category = category;
+          existingProduct.description = description;
+          existingProduct.detailImages = detailImages;
+          existingProduct.options = { colors, sizes };
+          if (images.length) existingProduct.images = images;
+          if (images[0]) existingProduct.image = images[0];
+          saveProducts(products);
+          editingProductId = null;
+          showNotification('Товар изменён');
+          renderProducts();
+          renderAccountModal();
+          return;
+        }
+      }
+
       products.push({
         id: maxId + 1,
         category,
@@ -1219,6 +1272,28 @@
       return loggedInUser || loadCustomerInfo() || { name: 'Не указан', phone: 'Не указан' };
     }
 
+    function editProduct(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      adminSection = 'products';
+      editingProductId = productId;
+      renderAccountModal();
+      setTimeout(() => {
+        document.getElementById('new-title').value = product.title;
+        document.getElementById('new-price').value = product.price;
+        document.getElementById('new-color').value = product.color;
+        document.getElementById('new-image').value = product.image;
+        document.getElementById('new-description').value = product.description || '';
+        document.getElementById('new-detail-images').value = (product.detailImages || []).join(', ');
+        document.getElementById('new-colors').value = (product.options?.colors || []).join(', ');
+        document.getElementById('new-sizes').value = (product.options?.sizes || []).join(', ');
+        document.getElementById('new-category').value = product.category;
+        document.getElementById('edit-product-id').value = product.id;
+        const submitBtn = document.querySelector('#account-modal .account-form button');
+        if (submitBtn) submitBtn.textContent = 'Сохранить изменения';
+      }, 50);
+    }
+
     function toggleProductVisibility(productId) {
       const product = products.find(p => p.id === productId);
       if (!product) return;
@@ -1251,6 +1326,23 @@
       return encodeURIComponent(text);
     }
 
+    function updateAdminHeaderButton() {
+      const btn = document.getElementById('admin-add-header-btn');
+      if (!btn) return;
+      btn.style.display = loggedInUser && loggedInUser.role === 'admin' ? 'flex' : 'none';
+    }
+
+    function openAdminAddSection() {
+      adminSection = 'products';
+      editingProductId = null;
+      renderAccountModal();
+      openAccount();
+      setTimeout(() => {
+        const form = document.getElementById('new-title');
+        if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
+    }
+
     function sendWhatsApp() {
       const msg = buildWhatsAppMessage();
       window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${msg}`, '_blank');
@@ -1263,6 +1355,7 @@
       }
       renderProducts();
       updateCartUI();
+      updateAdminHeaderButton();
     });
   </script>
 </body>
