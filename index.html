@@ -550,6 +550,9 @@
       .header-right .icon-btn:not(.cart-btn) {
         display: none;
       }
+      .header-right .cart-btn {
+        display: none;
+      }
       .hamburger {
         display: none !important;
       }
@@ -693,21 +696,19 @@
   <script>
     const usersKey = 'rb_users';
     const ordersKey = 'rb_orders';
-    const defaultUsers = [
-      { username: 'islam0814', password: 'islam01068448600', role: 'admin', name: 'Администратор', email: 'admin@originalmens.ru' },
-      { username: 'guest', password: 'guest1234', role: 'customer', name: 'Гость', email: 'guest@originalmens.ru' }
+    const productsKey = 'rb_products';
+    const defaultProducts = [
+      { id: 1, category: 'tops', title: 'Техническая куртка', price: 1250000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['S', 'M', 'L', 'XL'] } },
+      { id: 2, category: 'tops', title: 'Лёгкий пуховик', price: 1850000, color: 'Синий', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', images: ['https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80'], options: { colors: ['Синий'], sizes: ['M', 'L', 'XL'] } },
+      { id: 3, category: 'tops', title: 'Пальто из шерсти', price: 2450000, color: 'Кэмел', image: 'https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80', images: ['https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80'], options: { colors: ['Кэмел'], sizes: ['L', 'XL'] } },
+      { id: 4, category: 'bottoms', title: 'Брюки узкого кроя', price: 450000, color: 'Тёмно-серый', image: 'https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80', images: ['https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80'], options: { colors: ['Тёмно-серый'], sizes: ['30', '32', '34', '36'] } },
+      { id: 5, category: 'bottoms', title: 'Хлопковые чиносы', price: 380000, color: 'Бежевый', image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80', images: ['https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80'], options: { colors: ['Бежевый'], sizes: ['30', '32', '34'] } },
+      { id: 6, category: 'shoes', title: 'Кожаные кроссовки', price: 750000, color: 'Белый', image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80', images: ['https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80'], options: { colors: ['Белый'], sizes: ['40', '41', '42', '43', '44'] } },
+      { id: 7, category: 'shoes', title: 'Ботинки челси', price: 950000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80', images: ['https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['40', '41', '42', '43'] } },
+      { id: 8, category: 'bags', title: 'Нейлоновый рюкзак', price: 1100000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80', images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['One Size'] } }
     ];
 
-    const products = [
-      { id: 1, category: 'tops', title: 'Техническая куртка', price: 1250000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80' },
-      { id: 2, category: 'tops', title: 'Лёгкий пуховик', price: 1850000, color: 'Синий', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80' },
-      { id: 3, category: 'tops', title: 'Пальто из шерсти', price: 2450000, color: 'Кэмел', image: 'https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80' },
-      { id: 4, category: 'bottoms', title: 'Брюки узкого кроя', price: 450000, color: 'Тёмно-серый', image: 'https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80' },
-      { id: 5, category: 'bottoms', title: 'Хлопковые чиносы', price: 380000, color: 'Бежевый', image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80' },
-      { id: 6, category: 'shoes', title: 'Кожаные кроссовки', price: 750000, color: 'Белый', image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80' },
-      { id: 7, category: 'shoes', title: 'Ботинки челси', price: 950000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80' },
-      { id: 8, category: 'bags', title: 'Нейлоновый рюкзак', price: 1100000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80' }
-    ];
+    let products = loadProducts();
 
     let cart = [];
     let currentProduct = null;
@@ -723,6 +724,15 @@
 
     function saveUsers(users) {
       localStorage.setItem(usersKey, JSON.stringify(users));
+    }
+
+    function loadProducts() {
+      const stored = localStorage.getItem(productsKey);
+      return stored ? JSON.parse(stored) : defaultProducts.slice();
+    }
+
+    function saveProducts(prods) {
+      localStorage.setItem(productsKey, JSON.stringify(prods));
     }
 
     function loadOrders() {
@@ -833,10 +843,10 @@
       document.getElementById('cart-count').textContent = count;
       document.getElementById('cart-count-mobile').textContent = count;
       const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const shipping = cart.length > 0 ? 500 : 0;
+      const shipping = 500; // 무조건 500루블
       const total = subtotal + shipping;
       document.getElementById('cart-subtotal').textContent = `₽ ${subtotal.toLocaleString()}`;
-      document.getElementById('cart-shipping').textContent = `₽ ${shipping.toLocaleString()}`;
+      document.getElementById('cart-shipping').textContent = `₽ ${shipping.toLocaleString()} (Доставка)`;
       document.getElementById('cart-total').textContent = `₽ ${total.toLocaleString()}`;
     }
 
@@ -1050,7 +1060,10 @@
             <input id="new-title" placeholder="Название товара" />
             <input id="new-price" type="number" placeholder="Цена ₽" />
             <input id="new-color" placeholder="Цвет" />
-            <input id="new-image" placeholder="URL изображения" />
+            <input id="new-image" placeholder="URL изображения (или выберите файл)" />
+            <input type="file" id="new-image-file" accept="image/*,video/*" multiple />
+            <input id="new-colors" placeholder="Цвета (через запятую)" />
+            <input id="new-sizes" placeholder="Размеры (через запятую)" />
             <select id="new-category">
               <option value="tops">Верхняя одежда</option>
               <option value="bottoms">Брюки</option>
@@ -1095,14 +1108,47 @@
     }
 
     function addNewProduct() {
-      const title = document.getElementById('new-title').value.trim();
-      const price = Number(document.getElementById('new-price').value);
-      const color = document.getElementById('new-color').value.trim();
-      const image = document.getElementById('new-image').value.trim();
+      const titleUrl = document.getElementById('new-image').value.trim();
+      const imageFile = document.getElementById('new-image-file').files;
+      const colorsInput = document.getElementById('new-colors').value.trim();
+      const sizesInput = document.getElementById('new-sizes').value.trim();
       const category = document.getElementById('new-category').value;
-      if (!title || !price || !color || !image) {
+
+      let images = [];
+      if (imageUrl) {
+        images.push(imageUrl);
+      }
+      if (imageFile.length > 0) {
+        for (let file of imageFile) {
+          const url = URL.createObjectURL(file);
+          images.push(url);
+        }
+      }
+      if (images.length === 0) {
+        showNotification('Добавьте изображение (URL или файл)');
+        return;
+      }
+
+      const colors = colorsInput ? colorsInput.split(',').map(c => c.trim()) : [color];
+      const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()) : ['One Size'];
+
+      if (!title || !price || colors.length === 0) {
         showNotification('Заполните все поля товара');
         return;
+      }
+
+      const maxId = products.reduce((max, item) => Math.max(max, item.id), 0);
+      products.push({
+        id: maxId + 1,
+        category,
+        title,
+        price,
+        color: colors[0],
+        image: images[0],
+        images,
+        options: { colors, sizes }
+      });
+      saveProducts(products
       }
       const maxId = products.reduce((max, item) => Math.max(max, item.id), 0);
       products.push({ id: maxId + 1, category, title, price, color, image });
