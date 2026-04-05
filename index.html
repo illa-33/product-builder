@@ -810,9 +810,8 @@
 
     function openProductModal(id) {
       currentProduct = products.find(p => p.id === id);
+      currentImageIndex = 0;
       const body = document.getElementById('product-modal-body');
-      const imagesHtml = currentProduct.images.map((img, index) => `<img src="${img}" alt="${currentProduct.title}" style="width:100%; height:auto; display:${index === 0 ? 'block' : 'none'};">`).join('');
-      const dotsHtml = currentProduct.images.map((_, index) => `<span class="dot" onclick="changeImage(${index})" style="height:10px; width:10px; margin:0 2px; background-color:#bbb; border-radius:50%; display:inline-block; cursor:pointer;"></span>`).join('');
       body.innerHTML = `
         <div class="product-detail-image" style="position:relative; overflow:hidden;">
           <div id="image-container" style="display:flex; transition:transform 0.3s;">
@@ -1170,9 +1169,8 @@
         options: { colors, sizes }
       });
       saveProducts(products);
-      const users = getUsers().filter(user => user.username !== username);
-      saveUsers(users);
-      showNotification('Пользователь удалён');
+      renderProducts();
+      showNotification('Товар добавлен');
       renderAccountModal();
     }
 
@@ -1186,7 +1184,7 @@
         return;
       }
       const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const shipping = cart.length > 0 ? 500 : 0;
+      const shipping = 500; // 무조건 500루블
       const total = subtotal + shipping;
       const orders = getOrders();
       orders.push({ user: loggedInUser.username, items: cart.slice(), subtotal, shipping, total, status: 'Новый' });
@@ -1204,4 +1202,4 @@
     });
   </script>
 </body>
-</html>
+</html>500; // 무조건 500루블
