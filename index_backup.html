@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Really Brand - Official Store</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --text-muted: #666666;
+      --border: #e0e0e0;
+      --hover: #f5f5f5;
+      --accent: #000000;
+      --primary: #000000;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: rgba(0,0,0,0.05);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+    /* Header */
+    header { background: var(--bg); border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 1000; }
+    .header-content { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; }
+    .logo { font-size: 20px; font-weight: 700; letter-spacing: 1px; color: var(--text); text-decoration: none; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .icon-btn { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text); display: flex; align-items: center; justify-content: center; }
+    .cart-btn { position: relative; }
+    .cart-count { position: absolute; top: -5px; right: -10px; background: var(--text); color: white; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+
+    /* Admin Add Button in Header */
+    .admin-add-header-btn { border: 1px solid var(--text); background: transparent; color: var(--text); padding: 8px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; display: none; align-items: center; gap: 6px; text-transform: uppercase; font-weight: 600; }
+
+    /* NEW Section */
+    .new-products-section { padding: 40px 0 20px; border-bottom: 1px solid #f0f0f0; }
+    .new-products-section h2 { font-size: 18px; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
+    .new-products-scroll { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; -ms-overflow-style: none; }
+    .new-products-scroll::-webkit-scrollbar { display: none; }
+    .new-product-card { min-width: 200px; max-width: 200px; cursor: pointer; }
+    .new-product-card .product-image { width: 100%; aspect-ratio: 3/4; background: #f7f7f7; border-radius: 8px; overflow: hidden; position: relative; }
+    .new-product-card img { width: 100%; height: 100%; object-fit: cover; }
+    .new-product-card .product-title { font-size: 12px; font-weight: 600; margin-top: 8px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .new-product-card .product-price { font-size: 12px; color: var(--text-muted); }
+
+    /* Hero */
+    .hero { position: relative; height: 60vh; background: #f7f7f7; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; }
+    .hero img { position: absolute; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0.9; }
+    .hero-content { position: relative; z-index: 2; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+    .hero-content h1 { font-size: 42px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
+
+    /* Categories */
+    .category-section { padding: 40px 0 20px; }
+    .category-tabs { display: flex; gap: 20px; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; scrollbar-width: none; }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab { font-size: 14px; font-weight: 500; color: #999; cursor: pointer; text-transform: uppercase; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: all 0.3s; }
+    .category-tab.active { color: var(--text); border-bottom: 2px solid var(--text); }
+
+    /* Products Grid */
+    .products { padding: 20px 0 80px; }
+    .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px 15px; }
+    .product-card { position: relative; }
+    .product-image { width: 100%; aspect-ratio: 3/4; background: #f7f7f7; margin-bottom: 12px; overflow: hidden; position: relative; cursor: pointer; }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .product-card:hover .product-image img { transform: scale(1.03); }
+    .sold-out-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 8px; font-size: 10px; font-weight: 700; border-radius: 4px; z-index: 5; }
+    .product-info { text-align: left; }
+    .product-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); text-transform: uppercase; }
+    .product-price { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .product-color { font-size: 12px; color: #888; }
+
+    /* Admin Card Actions */
+    .admin-card-actions { display: flex; gap: 5px; margin-top: 10px; }
+    .admin-card-actions button { flex: 1; padding: 6px; font-size: 11px; cursor: pointer; border: 1px solid #ddd; background: white; border-radius: 4px; }
+    .admin-card-actions button:hover { background: #f0f0f0; }
+
+    /* Modals & Forms */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 4000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; padding: 40px; border-radius: 12px; }
+    .modal-close { position: absolute; top: 20px; right: 20px; font-size: 24px; background: none; border: none; cursor: pointer; }
+    .account-form { display: grid; gap: 16px; margin-top: 20px; }
+    .account-form input, .account-form select, .account-form textarea { width: 100%; border: 1px solid #ddd; padding: 12px; font-size: 14px; border-radius: 8px; font-family: inherit; }
+    .account-form button { border: none; background: var(--text); color: white; padding: 14px; font-size: 14px; text-transform: uppercase; cursor: pointer; border-radius: 8px; font-weight: 600; }
+    
+    .admin-panel { display: grid; gap: 20px; }
+    .admin-controls { display: flex; gap: 8px; margin-bottom: 10px; }
+    .admin-controls button { flex: 1; padding: 10px; border: 1px solid #000; background: white; font-size: 11px; text-transform: uppercase; cursor: pointer; border-radius: 6px; }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+    th, td { border: 1px solid #eee; padding: 8px; text-align: left; }
+    th { background: #f9f9f9; }
+
+    /* Mobile Bottom Nav */
+    .mobile-bottom-nav { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 500px; background: var(--glass-bg); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 40px; padding: 12px 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); z-index: 2000; justify-content: space-between; align-items: center; }
+    .mobile-bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text); text-decoration: none; font-size: 20px; background: none; border: none; cursor: pointer; }
+
+    @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) {
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .mobile-bottom-nav { display: flex; }
+      .header-right .icon-btn:not(.cart-btn), .header-right #admin-add-header-btn { display: none !important; }
+      .hero { height: 40vh; }
+      .hero-content h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="header-left">
+          <a href="index.html" class="logo">Really Brand</a>
+        </div>
+        <div class="header-right">
+          <button id="admin-add-header-btn" class="admin-add-header-btn" onclick="openAdminAddSection()">＋ 상품 추가</button>
+          <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+          <button class="icon-btn" onclick="openAccount()">👤</button>
+          <button class="icon-btn cart-btn" onclick="openCart()">
+            🛒 <span class="cart-count" id="cart-count">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav">
+    <button class="nav-item" onclick="location.href='index.html'">🏠</button>
+    <button class="nav-item" onclick="toggleSearch()">🔍</button>
+    <button class="nav-item" onclick="openAccount()">👤</button>
+    <button class="nav-item cart-btn" onclick="openCart()">
+      🛒 <span class="cart-count" id="cart-count-mobile">0</span>
+    </button>
+  </nav>
+
+  <section class="hero">
+    <img src="https://raw.githubusercontent.com/illa-33/product-builder/main/brand.png" alt="home">
+    <div class="hero-content">
+      <h1>New Collection</h1>
+      <button class="btn-black" onclick="filterProducts('all')" style="background: black; color: white; border: none; padding: 12px 24px; cursor: pointer; text-transform: uppercase; font-weight: 600; border-radius: 4px;">Explore Now</button>
+    </div>
+  </section>
+
+  <!-- NEW SECTION -->
+  <section class="new-products-section" id="new-section">
+    <div class="container">
+      <h2>NEW ARRIVALS</h2>
+      <div class="new-products-scroll" id="new-products-scroll">
+        <!-- New items injected here -->
+      </div>
+    </div>
+  </section>
+
+  <section class="category-section">
+    <div class="container">
+      <div class="category-tabs" id="category-tabs">
+        <span class="category-tab active" data-category="all" onclick="filterProducts('all')">Все</span>
+        <span class="category-tab" data-category="tops" onclick="filterProducts('tops')">Верхняя одежда</span>
+        <span class="category-tab" data-category="bottoms" onclick="filterProducts('bottoms')">Брюки</span>
+        <span class="category-tab" data-category="shoes" onclick="filterProducts('shoes')">Обувь</span>
+        <span class="category-tab" data-category="bags" onclick="filterProducts('bags')">Сумки</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="products" id="products">
+    <div class="container">
+      <div class="product-grid" id="product-grid">
+        <!-- Products injected here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Modals -->
+  <div class="modal" id="account-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('account-modal')">×</button>
+      <div id="account-modal-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('cart-modal')">×</button>
+      <h3 style="text-transform: uppercase;">Корзина</h3>
+      <div id="cart-items" style="margin-top: 20px;"></div>
+      <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+        <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 20px;">
+          <span>Итого</span>
+          <span id="cart-total">₽ 0</span>
+        </div>
+        <button class="btn-black" onclick="checkout()" style="width: 100%; background: black; color: white; padding: 15px; border: none; font-weight: 600; cursor: pointer; text-transform: uppercase;">Оформить заказ</button>
+        <button class="btn-black" onclick="sendWhatsApp()" style="width: 100%; margin-top:10px; background:#25D366; color: white; padding: 15px; border: none; font-weight: 600; cursor: pointer;">WhatsApp 주문</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-overlay" id="search-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 3500; display: none; padding: 40px;">
+    <button class="modal-close" onclick="toggleSearch()">×</button>
+    <div style="display: flex; align-items: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-top: 60px;">
+      <input type="text" id="search-input" placeholder="Поиск..." style="flex: 1; border: none; font-size: 24px; outline: none; font-weight: 600;" oninput="updateSearch()">
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p style="text-align: center; color: #999; font-size: 12px; padding: 40px 0;">© 2026 Really Brand. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const productsKey = 'products';
+    const usersKey = 'rb_users';
+    const sessionUserKey = 'rb_session_user';
+    const cartKey = 'rb_cart';
+    const whatsappNumber = '821068448600';
+
+    const defaultUsers = [
+      { username: 'islam0814', password: '01068448600', role: 'admin', name: '관리자' },
+      { username: 'guest', password: '123', role: 'customer', name: '게스트' }
+    ];
+
+    const defaultProducts = [
+      { id: 1, category: 'tops', name: 'Technical Jacket', price: 1250000, color: 'Black', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', isSoldOut: false, createdAt: Date.now() - 100000 },
+      { id: 2, category: 'tops', name: 'Light Down Jacket', price: 1850000, color: 'Blue', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', isSoldOut: false, createdAt: Date.now() - 200000 },
+      { id: 3, category: 'tops', name: 'Wool Coat', price: 2450000, color: 'Camel', image: 'https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80', isSoldOut: true, createdAt: Date.now() - 300000 },
+      { id: 4, category: 'bottoms', name: 'Slim Fit Pants', price: 450000, color: 'Grey', image: 'https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80', isSoldOut: false, createdAt: Date.now() - 400000 }
+    ];
+
+    let products = loadProducts();
+    let cart = loadCart();
+    let loggedInUser = loadCurrentUser();
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let editingProductId = null;
+
+    // LocalStorage Sync
+    function loadProducts() {
+      const stored = localStorage.getItem(productsKey);
+      if (!stored) {
+        localStorage.setItem(productsKey, JSON.stringify(defaultProducts));
+        return defaultProducts;
+      }
+      return JSON.parse(stored);
+    }
+    function saveProducts(prods) {
+      localStorage.setItem(productsKey, JSON.stringify(prods));
+    }
+    function loadCart() {
+      const stored = localStorage.getItem(cartKey);
+      return stored ? JSON.parse(stored) : [];
+    }
+    function saveCart(items) {
+      localStorage.setItem(cartKey, JSON.stringify(items));
+    }
+    function loadCurrentUser() {
+      const stored = localStorage.getItem(sessionUserKey);
+      return stored ? JSON.parse(stored) : null;
+    }
+    function saveCurrentUser(user) {
+      localStorage.setItem(sessionUserKey, JSON.stringify(user));
+    }
+
+    // Render Logic
+    function renderAll() {
+      renderNew();
+      renderGrid();
+      updateAdminUI();
+      updateCartCount();
+    }
+
+    function sortLogic(a, b) {
+      if (a.isSoldOut && !b.isSoldOut) return 1;
+      if (!a.isSoldOut && b.isSoldOut) return -1;
+      return b.createdAt - a.createdAt;
+    }
+
+    function renderNew() {
+      const container = document.getElementById('new-products-scroll');
+      const sorted = [...products].sort((a, b) => b.createdAt - a.createdAt).slice(0, 6);
+      container.innerHTML = sorted.map(p => `
+        <div class="new-product-card" onclick="openProduct(${p.id})">
+          <div class="product-image">
+            <img src="${p.image}" alt="${p.name}">
+            ${p.isSoldOut ? '<div class="sold-out-badge">SOLD OUT</div>' : ''}
+          </div>
+          <div class="product-title">${p.name}</div>
+          <div class="product-price">₽ ${p.price.toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('product-grid');
+      const filtered = products
+        .filter(p => currentFilter === 'all' || p.category === currentFilter)
+        .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        .sort(sortLogic);
+
+      grid.innerHTML = filtered.map(p => `
+        <div class="product-card">
+          <div class="product-image" onclick="openProduct(${p.id})">
+            <img src="${p.image}" alt="${p.name}">
+            ${p.isSoldOut ? '<div class="sold-out-badge">SOLD OUT</div>' : ''}
+          </div>
+          <div class="product-info">
+            <div onclick="openProduct(${p.id})">
+              <div class="product-title">${p.name}</div>
+              <div class="product-price">₽ ${p.price.toLocaleString()}</div>
+            </div>
+            ${loggedInUser && loggedInUser.role === 'admin' ? `
+              <div class="admin-card-actions">
+                <button onclick="editProduct(${p.id})">수정</button>
+                <button onclick="toggleSoldOut(${p.id})">${p.isSoldOut ? '재입고' : '품절'}</button>
+                <button onclick="deleteProduct(${p.id})">삭제</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Admin Functions
+    function updateAdminUI() {
+      const addBtn = document.getElementById('admin-add-header-btn');
+      if (loggedInUser && loggedInUser.role === 'admin') {
+        addBtn.style.display = 'flex';
+      } else {
+        addBtn.style.display = 'none';
+      }
+    }
+
+    function toggleSoldOut(id) {
+      const p = products.find(x => x.id === id);
+      if (p) {
+        p.isSoldOut = !p.isSoldOut;
+        saveProducts(products);
+        renderAll();
+      }
+    }
+
+    function deleteProduct(id) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      products = products.filter(x => x.id !== id);
+      saveProducts(products);
+      renderAll();
+    }
+
+    function editProduct(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      editingProductId = id;
+      openAccount(); // Open modal
+      renderAdminForm(p);
+    }
+
+    function openAdminAddSection() {
+      editingProductId = null;
+      openAccount();
+      renderAdminForm();
+    }
+
+    function renderAdminForm(data = {}) {
+      const body = document.getElementById('account-modal-body');
+      body.innerHTML = `
+        <h3 style="text-transform:uppercase;">${editingProductId ? '상품 수정' : '상품 추가'}</h3>
+        <form class="account-form" onsubmit="handleProductSubmit(event)">
+          <input id="f-name" placeholder="상품명" value="${data.name || ''}" required />
+          <input id="f-price" type="number" placeholder="가격 (₽)" value="${data.price || ''}" required />
+          <input id="f-image" placeholder="이미지 URL" value="${data.image || ''}" required />
+          <select id="f-category">
+            <option value="tops" ${data.category === 'tops' ? 'selected' : ''}>Верхняя одежда</option>
+            <option value="bottoms" ${data.category === 'bottoms' ? 'selected' : ''}>Брюки</option>
+            <option value="shoes" ${data.category === 'shoes' ? 'selected' : ''}>Обувь</option>
+            <option value="bags" ${data.category === 'bags' ? 'selected' : ''}>Сумки</option>
+          </select>
+          <button type="submit">${editingProductId ? '저장' : '추가'}</button>
+        </form>
+      `;
+    }
+
+    function handleProductSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('f-name').value;
+      const price = Number(document.getElementById('f-price').value);
+      const image = document.getElementById('f-image').value;
+      const category = document.getElementById('f-category').value;
+
+      if (editingProductId) {
+        const p = products.find(x => x.id === editingProductId);
+        p.name = name;
+        p.price = price;
+        p.image = image;
+        p.category = category;
+      } else {
+        const newP = {
+          id: Date.now(),
+          name, price, image, category,
+          isSoldOut: false,
+          createdAt: Date.now()
+        };
+        products.push(newP);
+      }
+      saveProducts(products);
+      renderAll();
+      closeModal('account-modal');
+    }
+
+    // Account Modal
+    function openAccount() {
+      const modal = document.getElementById('account-modal');
+      modal.classList.add('active');
+      if (!loggedInUser) {
+        renderLoginForm();
+      } else if (loggedInUser.role === 'admin') {
+        // Admin already sees the form if edit/add was clicked, 
+        // but if just clicked profile:
+        renderAdminDashboard();
+      } else {
+        renderUserDashboard();
+      }
+    }
+
+    function renderLoginForm() {
+      const body = document.getElementById('account-modal-body');
+      body.innerHTML = `
+        <h3 style="text-transform:uppercase;">로그인</h3>
+        <p style="font-size:12px; color:666; margin-top:5px;"></p>
+        <form class="account-form" onsubmit="handleLogin(event)">
+          <input id="l-user" placeholder="ID" required />
+          <input id="l-pass" type="password" placeholder="Password" required />
+          <button type="submit">Log In</button>
+        </form>
+      `;
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('l-user').value;
+      const p = document.getElementById('l-pass').value;
+      const user = defaultUsers.find(x => x.username === u && x.password === p);
+      if (user) {
+        loggedInUser = user;
+        saveCurrentUser(user);
+        renderAll();
+        closeModal('account-modal');
+      } else {
+        alert('잘못된 정보입니다.');
+      }
+    }
+
+    function renderAdminDashboard() {
+      const body = document.getElementById('account-modal-body');
+      body.innerHTML = `
+        <h3>관리자 패널</h3>
+        <div style="margin-top:20px;">
+          <p>안녕하세요, ${loggedInUser.name}님</p>
+          <button class="btn-black" onclick="openAdminAddSection()" style="width:100%; margin-top:20px;">새 상품 추가</button>
+          <button class="btn-black" onclick="logout()" style="width:100%; margin-top:10px; background:transparent; color:black; border:1px solid black;">로그아웃</button>
+        </div>
+      `;
+    }
+
+    function renderUserDashboard() {
+      const body = document.getElementById('account-modal-body');
+      body.innerHTML = `
+        <h3>My Page</h3>
+        <div style="margin-top:20px;">
+          <p>안녕하세요, ${loggedInUser.name}님</p>
+          <button class="btn-black" onclick="logout()" style="width:100%; margin-top:20px;">로그아웃</button>
+        </div>
+      `;
+    }
+
+    function logout() {
+      loggedInUser = null;
+      localStorage.removeItem(sessionUserKey);
+      renderAll();
+      closeModal('account-modal');
+    }
+
+    // Search
+    function toggleSearch() {
+      const el = document.getElementById('search-overlay');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+    function updateSearch() {
+      searchQuery = document.getElementById('search-input').value;
+      renderGrid();
+    }
+
+    // Cart
+    function updateCartCount() {
+      const count = cart.reduce((s, i) => s + i.quantity, 0);
+      document.getElementById('cart-count').innerText = count;
+      document.getElementById('cart-count-mobile').innerText = count;
+    }
+    function openCart() {
+      document.getElementById('cart-modal').classList.add('active');
+      renderCartItems();
+    }
+    function renderCartItems() {
+      const container = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+      let total = 0;
+      if (cart.length === 0) {
+        container.innerHTML = '<p>장바구니가 비어있습니다.</p>';
+      } else {
+        container.innerHTML = cart.map(item => {
+          total += item.price * item.quantity;
+          return `
+            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center;">
+              <img src="${item.image}" style="width:50px; height:65px; object-fit:cover;">
+              <div style="flex:1; font-size:12px;">
+                <b>${item.name}</b><br>
+                ₽ ${item.price.toLocaleString()} x ${item.quantity}
+              </div>
+              <button onclick="removeFromCart(${item.id})" style="border:none; background:none; font-size:12px; text-decoration:underline; cursor:pointer;">삭제</button>
+            </div>
+          `;
+        }).join('');
+      }
+      totalEl.innerText = `₽ ${total.toLocaleString()}`;
+    }
+    function removeFromCart(id) {
+      cart = cart.filter(x => x.id !== id);
+      saveCart(cart);
+      updateCartCount();
+      renderCartItems();
+    }
+    function checkout() {
+      if (cart.length === 0) return alert('장바구니가 비어있습니다.');
+      alert('주문이 완료되었습니다.');
+      cart = [];
+      saveCart(cart);
+      updateCartCount();
+      closeModal('cart-modal');
+    }
+    function sendWhatsApp() {
+      if (cart.length === 0) return alert('장바구니가 비어있습니다.');
+      const msg = encodeURIComponent(`[주문]\n` + cart.map(i => `- ${i.name} x${i.quantity}`).join('\n'));
+      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${msg}`);
+    }
+
+    // Helper
+    function openProduct(id) {
+      location.href = `product.html?id=${id}`;
+    }
+    function filterProducts(cat) {
+      currentFilter = cat;
+      document.querySelectorAll('.category-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.category === cat);
+      });
+      renderGrid();
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderAll);
+  </script>
+</body>
+</html>

@@ -3,235 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Товар — Original Mens</title>
+  <title>Детали товара - Really Brand</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
   <style>
-    :root {
-      --bg: #ffffff;
-      --text: #111111;
-      --muted: #666666;
-      --border: #e7e7e7;
-      --accent: #000000;
-      --primary: #000000;
-      --success: #10b981;
-      --shadow: rgba(0,0,0,0.08);
+    .product-detail-container { padding: 40px 0; display: grid; gap: 40px; }
+    @media (min-width: 768px) {
+      .product-detail-container { grid-template-columns: 1fr 1fr; }
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px; }
-    .logo { font-size: 18px; font-weight: 700; text-transform: uppercase; color: var(--text); text-decoration: none; }
-    .back-button { border: 1px solid var(--text); background: none; color: var(--text); padding: 10px 14px; border-radius: 10px; cursor: pointer; font-size: 14px; }
-    .product-detail { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: 30px; align-items: start; }
-    .gallery-shell { position: relative; overflow: hidden; border: 1px solid var(--border); border-radius: 20px; }
-    #product-image-gallery { display: flex; width: 100%; scroll-snap-type: x mandatory; overflow-x: hidden; }
-    #product-image-gallery img { width: 100%; max-width: 100%; object-fit: cover; scroll-snap-align: center; }
-    .gallery-slide { min-width: 100%; display: flex; justify-content: center; align-items: center; }
-    .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: none; background: rgba(255,255,255,0.8); cursor: pointer; font-size: 22px; }
-    .gallery-nav.left { left: 10px; }
-    .gallery-nav.right { right: 10px; }
-    .gallery-dots { display: flex; justify-content: center; gap: 8px; margin: 18px 0 0; }
-    .gallery-dots button { width: 10px; height: 10px; border-radius: 50%; border: none; background: #ccc; cursor: pointer; }
-    .gallery-dots button.active { background: var(--text); }
-    .product-summary { display: grid; gap: 18px; }
-    .product-summary h1 { font-size: 30px; text-transform: uppercase; }
-    .product-summary p { color: var(--muted); }
-    .product-summary .price { font-size: 26px; font-weight: 700; color: var(--text); }
-    .product-summary .option-group { display: grid; gap: 10px; }
-    .product-summary select { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 14px; }
-    .product-summary button { border: none; border-radius: 12px; padding: 14px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-    .product-summary button.primary { background: var(--primary); color: white; }
-    .product-summary button.whatsapp { background: #25D366; color: white; }
-    .detail-images { margin-top: 40px; }
-    .detail-images h2 { font-size: 20px; margin-bottom: 16px; }
-    .detail-image-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .detail-image-grid img { width: 100%; border-radius: 16px; object-fit: cover; }
-    @media (max-width: 960px) { .product-detail { grid-template-columns: 1fr; } .detail-image-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 640px) { .detail-image-grid { grid-template-columns: 1fr; } .gallery-nav { width: 40px; height: 40px; } }
+    .product-detail-media img, .product-detail-media video { width: 100%; border-radius: 12px; }
+    .product-detail-info h1 { font-size: 28px; text-transform: uppercase; margin-bottom: 10px; }
+    .product-detail-price { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+    .product-detail-description { margin-top: 40px; line-height: 1.8; color: #444; }
+    .product-detail-description img { max-width: 100%; margin-top: 20px; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <header class="container">
-    <button class="back-button" onclick="goBack()">← Назад</button>
-    <a class="logo" href="index.html">Original Mens</a>
-  </header>
-  <main class="container">
-    <div class="product-detail">
-      <div>
-        <div class="gallery-shell">
-          <div id="product-image-gallery"></div>
-          <button class="gallery-nav left" onclick="prevImage()">‹</button>
-          <button class="gallery-nav right" onclick="nextImage()">›</button>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="index.html" class="logo">Really Brand</a>
+        <div class="header-right">
+          <button class="icon-btn" onclick="location.href='index.html'">🏠</button>
+          <button class="icon-btn cart-btn" onclick="openCart()">
+            🛒 <span class="cart-count">0</span>
+          </button>
         </div>
-        <div class="gallery-dots" id="gallery-dots"></div>
-      </div>
-      <div class="product-summary">
-        <h1 id="detail-title">Загрузка...</h1>
-        <div class="price" id="detail-price"></div>
-        <p id="detail-description"></p>
-        <div class="option-group" id="options-section"></div>
-        <button class="primary" onclick="addToCartDetail()">В корзину</button>
-        <button class="whatsapp" onclick="sendWhatsApp()">Заказать WhatsApp</button>
       </div>
     </div>
-    <section class="detail-images">
-      <h2>Дополнительные фото</h2>
-      <div class="detail-image-grid" id="detail-additional-images"></div>
-    </section>
+  </header>
+
+  <main class="container">
+    <div id="product-detail-content" class="product-detail-container">
+      <!-- Content injected here -->
+      <p style="padding: 100px 0; text-align: center;">Загрузка...</p>
+    </div>
   </main>
-  <footer class="container" style="margin-top:40px; padding-bottom:20px; font-size:13px; color:#999; text-align:center;">© 2026 ОРИГИНАЛ МЕНС. Все права защищены.</footer>
+
+  <div class="modal" id="cart-modal">
+    <div class="modal-content">
+      <button class="close-btn" onclick="closeModal('cart-modal')">×</button>
+      <h3 style="text-transform: uppercase;">Корзина</h3>
+      <div id="cart-items" class="cart-items"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Итого</span>
+          <span id="cart-total">₽ 0</span>
+        </div>
+        <button class="whatsapp-btn" onclick="sendWhatsApp()">
+          Заказать через WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="padding: 60px 0; text-align: center; border-top: 1px solid var(--border); margin-top: 40px;">
+    <p style="font-size: 12px; color: #999;">© 2026 Really Brand. Все права защищены.</p>
+  </footer>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
   <script>
-    const productsKey = 'rb_products';
-    const cartKey = 'rb_cart';
-    const whatsappNumber = '821068448600';
-    const defaultProducts = [
-      { id: 1, category: 'tops', title: 'Техническая куртка', price: 1250000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80'], detailImages: [], description: 'Лёгкая техническая куртка для активной жизни.', options: { colors: ['Чёрный'], sizes: ['S', 'M', 'L', 'XL'] } },
-      { id: 2, category: 'tops', title: 'Лёгкий пуховик', price: 1850000, color: 'Синий', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', images: ['https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80'], detailImages: [], description: 'Удобный пуховик с мягкой подкладкой.', options: { colors: ['Синий'], sizes: ['M', 'L', 'XL'] } },
-      { id: 3, category: 'tops', title: 'Пальто из шерсти', price: 2450000, color: 'Кэмел', image: 'https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80', images: ['https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80'], detailImages: [], description: 'Элегантное пальто из качественной шерсти.', options: { colors: ['Кэмел'], sizes: ['L', 'XL'] } },
-      { id: 4, category: 'bottoms', title: 'Брюки узкого кроя', price: 450000, color: 'Тёмно-серый', image: 'https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80', images: ['https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80'], detailImages: [], description: 'Брюки узкого кроя для городской носки.', options: { colors: ['Тёмно-серый'], sizes: ['30', '32', '34', '36'] } },
-      { id: 5, category: 'bottoms', title: 'Хлопковые чиносы', price: 380000, color: 'Бежевый', image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80', images: ['https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80'], detailImages: [], description: 'Классические чиносы для повседневного стиля.', options: { colors: ['Бежевый'], sizes: ['30', '32', '34'] } },
-      { id: 6, category: 'shoes', title: 'Кожаные кроссовки', price: 750000, color: 'Белый', image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80', images: ['https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80'], detailImages: [], description: 'Кожаные кроссовки в минималистичном стиле.', options: { colors: ['Белый'], sizes: ['40', '41', '42', '43', '44'] } },
-      { id: 7, category: 'shoes', title: 'Ботинки челси', price: 950000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80', images: ['https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80'], detailImages: [], description: 'Стильные ботинки челси для осеннего сезона.', options: { colors: ['Чёрный'], sizes: ['40', '41', '42', '43'] } },
-      { id: 8, category: 'bags', title: 'Нейлоновый рюкзак', price: 1100000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80', images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80'], detailImages: [], description: 'Прочный рюкзак для повседневных поездок.', options: { colors: ['Чёрный'], sizes: ['One Size'] } }
-    ];
-
-    let products = loadProducts();
-    let cart = loadCart();
-    let selectedColor = '';
-    let selectedSize = '';
-    let currentImageIndex = 0;
-    let currentProduct = null;
-
-    function loadProducts() {
-      const stored = localStorage.getItem(productsKey);
-      return stored ? JSON.parse(stored) : defaultProducts.slice();
-    }
-
-    function loadCart() {
-      const stored = localStorage.getItem(cartKey);
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    function saveCart(items) {
-      localStorage.setItem(cartKey, JSON.stringify(items));
-    }
-
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
-
-    function initProductDetail() {
-      const productId = Number(getQueryParam('id'));
-      currentProduct = products.find(product => product.id === productId);
-      if (!currentProduct) {
-        document.getElementById('detail-title').textContent = 'Товар не найден';
-        document.getElementById('detail-price').textContent = '';
-        document.getElementById('detail-description').textContent = 'Вернитесь на главную страницу и выберите другой товар.';
+    // Specific logic for detail page
+    async function loadProductDetail() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) {
+        window.location.href = 'index.html';
         return;
       }
-      renderProductDetail();
-    }
 
-    function renderProductDetail() {
-      document.getElementById('detail-title').textContent = currentProduct.title;
-      document.getElementById('detail-price').textContent = `₽ ${currentProduct.price.toLocaleString()}`;
-      document.getElementById('detail-description').textContent = currentProduct.description || 'Описание товара отсутствует.';
-      renderGallery();
-      renderOptions();
-      renderAdditionalImages();
-    }
+      const { data: product, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    function renderGallery() {
-      const gallery = document.getElementById('product-image-gallery');
-      const images = Array.isArray(currentProduct.images) && currentProduct.images.length ? currentProduct.images : [currentProduct.image];
-      gallery.innerHTML = images.map(src => `<div class="gallery-slide"><img src="${src}" alt="${currentProduct.title}"></div>`).join('');
-      const dots = document.getElementById('gallery-dots');
-      dots.innerHTML = images.map((_, index) => `<button class="${index === 0 ? 'active' : ''}" onclick="goToImage(${index})"></button>`).join('');
-      currentImageIndex = 0;
-      scrollGallery();
-    }
+      if (error || !product) {
+        document.getElementById('product-detail-content').innerHTML = '<p style="padding: 100px 0; text-align: center;">Товар не найден.</p>';
+        return;
+      }
 
-    function renderOptions() {
-      const section = document.getElementById('options-section');
-      const colors = currentProduct.options?.colors || [currentProduct.color || 'Выберите цвет'];
-      const sizes = currentProduct.options?.sizes || ['One Size'];
-      selectedColor = colors[0];
-      selectedSize = sizes[0];
-      section.innerHTML = `
-        <label>
-          Цвет
-          <select id="color-select" onchange="selectedColor = this.value">
-            ${colors.map(color => `<option value="${color}">${color}</option>`).join('')}
-          </select>
-        </label>
-        <label>
-          Размер
-          <select id="size-select" onchange="selectedSize = this.value">
-            ${sizes.map(size => `<option value="${size}">${size}</option>`).join('')}
-          </select>
-        </label>
+      const content = document.getElementById('product-detail-content');
+      content.innerHTML = `
+        <div class="product-detail-media">
+          ${product.video_url 
+            ? `<video src="${product.video_url}" autoplay loop muted playsinline></video>` 
+            : `<img src="${product.image_url || 'https://via.placeholder.com/600x800'}" alt="${product.name}">`
+          }
+        </div>
+        <div class="product-detail-info">
+          <h1>${product.name}</h1>
+          <div class="product-detail-price">₽ ${product.price.toLocaleString()}</div>
+          <button class="add-btn" style="padding: 20px;" onclick="addToCart('${product.id}')" ${product.is_sold_out ? 'disabled' : ''}>
+            ${product.is_sold_out ? 'Нет в наличии' : 'Добавить в корзину'}
+          </button>
+          
+          <div class="product-detail-description">
+            ${product.detail_html || ''}
+            ${product.detail_image_url ? `<img src="${product.detail_image_url}" alt="Details">` : ''}
+          </div>
+        </div>
       `;
     }
 
-    function renderAdditionalImages() {
-      const container = document.getElementById('detail-additional-images');
-      const detailImages = Array.isArray(currentProduct.detailImages) && currentProduct.detailImages.length ? currentProduct.detailImages : (currentProduct.images || []).slice(1);
-      if (!detailImages.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Дополнительные фото отсутствуют.</p>';
-        return;
-      }
-      container.innerHTML = detailImages.map(src => `<img src="${src}" alt="Дополнительное фото">`).join('');
-    }
+    // Override the alert in app.js
+    window.openProductDetail = (id) => {
+      window.location.href = `product.html?id=${id}`;
+    };
 
-    function goToImage(index) {
-      currentImageIndex = index;
-      scrollGallery();
+    if (window.location.pathname.includes('product.html')) {
+      document.addEventListener('DOMContentLoaded', loadProductDetail);
     }
-
-    function prevImage() {
-      const total = document.querySelectorAll('#product-image-gallery .gallery-slide').length;
-      currentImageIndex = (currentImageIndex - 1 + total) % total;
-      scrollGallery();
-    }
-
-    function nextImage() {
-      const total = document.querySelectorAll('#product-image-gallery .gallery-slide').length;
-      currentImageIndex = (currentImageIndex + 1) % total;
-      scrollGallery();
-    }
-
-    function scrollGallery() {
-      const gallery = document.getElementById('product-image-gallery');
-      const slideWidth = gallery.clientWidth;
-      gallery.scrollTo({ left: slideWidth * currentImageIndex, behavior: 'smooth' });
-      document.querySelectorAll('#gallery-dots button').forEach((button, index) => {
-        button.classList.toggle('active', index === currentImageIndex);
-      });
-    }
-
-    function addToCartDetail() {
-      if (!currentProduct) return;
-      const existing = cart.find(item => item.id === currentProduct.id);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({ ...currentProduct, quantity: 1 });
-      }
-      saveCart(cart);
-      alert('Товар добавлен в корзину');
-    }
-
-    function sendWhatsApp() {
-      const items = currentProduct ? `1 x ${currentProduct.title}` : 'Нет товаров';
-      const text = `* [주문 생성] *\nТовар: ${currentProduct?.title || '-'}\nЦвет: ${selectedColor || '-'}\nРазмер: ${selectedSize || '-'}\nСумма: ₽ ${currentProduct?.price?.toLocaleString() || '0'}\nКонтакт: `;
-      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    function goBack() {
-      window.location.href = 'index.html';
-    }
-
-    document.addEventListener('DOMContentLoaded', initProductDetail);
   </script>
 </body>
 </html>

@@ -1,1362 +1,189 @@
-<html lang="ru"><head>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Really Brand - Official Store</title>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/style.css">
   <style>
+    /* Inline critical styles for layout until style.css is fully defined */
     :root {
       --bg: #ffffff;
       --text: #000000;
       --text-muted: #666666;
-      --border: #e0e0e0;
-      --hover: #f5f5f5;
+      --border: #eeeeee;
       --accent: #000000;
-      --primary: #000000;
-      --success: #10b981;
-      --danger: #ef4444;
-      --shadow: rgba(0,0,0,0.05);
-      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-bg: rgba(255, 255, 255, 0.9);
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    
+    header { position: sticky; top: 0; background: var(--glass-bg); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid var(--border); }
+    .header-content { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; }
+    .logo { font-size: 22px; font-weight: 800; text-transform: uppercase; text-decoration: none; color: var(--text); letter-spacing: 2px; }
+    .header-right { display: flex; align-items: center; gap: 20px; }
+    .icon-btn { background: none; border: none; cursor: pointer; font-size: 20px; }
+    .cart-btn { position: relative; }
+    .cart-count { position: absolute; top: -5px; right: -10px; background: var(--text); color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    /* Header */
-    header {
-      background: var(--bg);
-      border-bottom: 1px solid #f0f0f0;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 0;
-    }
-
-    .logo {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: var(--text);
-      text-decoration: none;
-      text-transform: uppercase;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 20px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .cart-btn {
-      position: relative;
-    }
-
-    .cart-count {
-      position: absolute;
-      top: -5px;
-      right: -10px;
-      background: var(--text);
-      color: white;
-      border-radius: 50%;
-      width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: bold;
-    }
-
-    /* Mobile Bottom Nav */
-    .mobile-bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 40px);
-      max-width: 500px;
-      background: var(--glass-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 40px;
-      padding: 12px 25px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      z-index: 2000;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .mobile-bottom-nav .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: var(--text);
-      text-decoration: none;
-      font-size: 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    /* Hero Banner */
-    .hero {
-      position: relative;
-      height: 60vh;
-      background: #f7f7f7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      overflow: hidden;
-    }
-
-    .hero img {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      color: white;
-    }
-
-    .hero-content h1 {
-      font-size: 42px;
-      margin-bottom: 15px;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
+    /* NEW Section */
+    .new-section { padding: 40px 0; }
+    .new-section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; color: var(--text-muted); }
+    .new-products-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
+    .new-products-scroll::-webkit-scrollbar { display: none; }
+    .new-product-card { min-width: 160px; max-width: 160px; cursor: pointer; }
+    .new-product-card .img-wrapper { width: 100%; aspect-ratio: 3/4; background: #f5f5f5; border-radius: 4px; overflow: hidden; }
+    .new-product-card img { width: 100%; height: 100%; object-fit: cover; }
+    .new-product-card .info { margin-top: 10px; }
+    .new-product-card .name { font-size: 12px; font-weight: 600; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .new-product-card .price { font-size: 12px; color: var(--text-muted); }
 
     /* Categories */
-    .category-section {
-      padding: 40px 0 20px;
-    }
+    .category-tabs { display: flex; gap: 20px; overflow-x: auto; padding: 20px 0; border-bottom: 1px solid var(--border); scrollbar-width: none; }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab { font-size: 13px; font-weight: 600; text-transform: uppercase; color: #999; cursor: pointer; padding-bottom: 5px; border-bottom: 2px solid transparent; transition: 0.3s; white-space: nowrap; }
+    .category-tab.active { color: var(--text); border-bottom: 2px solid var(--text); }
 
-    .category-tabs {
-      display: flex;
-      gap: 20px;
-      overflow-x: auto;
-      white-space: nowrap;
-      padding-bottom: 10px;
-      scrollbar-width: none; /* Firefox */
-    }
-
-    .category-tabs::-webkit-scrollbar {
-      display: none; /* Chrome, Safari */
-    }
-
-    .category-tab {
-      font-size: 14px;
-      font-weight: 500;
-      color: #999;
-      cursor: pointer;
-      text-transform: uppercase;
-      padding-bottom: 5px;
-      border-bottom: 2px solid transparent;
-      transition: all 0.3s;
-    }
-
-    .category-tab.active {
-      color: var(--text);
-      border-bottom: 2px solid var(--text);
-    }
-
-    /* Products */
-    .products {
-      padding: 20px 0 80px;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 30px 15px;
-    }
-
-    .product-card {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-    }
-
-    .product-image {
-      width: 100%;
-      aspect-ratio: 3/4;
-      background: #f7f7f7;
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-
-    .product-card:hover .product-image img {
-      transform: scale(1.03);
-    }
-
-    .product-info {
-      text-align: left;
-    }
-
-    .product-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: var(--text);
-      text-transform: uppercase;
-    }
-
-    .product-price {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .product-color {
-      font-size: 12px;
-      color: #888;
-    }
-
-    /* Side Menu */
-    .side-menu {
-      position: fixed;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 3000;
-      transition: left 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-      padding: 60px 40px;
-    }
-
-    .side-menu.open {
-      left: 0;
-    }
-
-    .side-menu .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 30px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .side-menu ul {
-      list-style: none;
-      margin-top: 40px;
-    }
-
-    .side-menu li {
-      margin-bottom: 25px;
-    }
-
-    .side-menu li a {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--text);
-      text-decoration: none;
-      text-transform: uppercase;
-    }
+    /* Product Grid */
+    .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 40px 0; }
+    @media (min-width: 768px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+    .product-card { position: relative; }
+    .product-card.sold-out { opacity: 0.6; }
+    .product-card .img-wrapper { width: 100%; aspect-ratio: 3/4; background: #f5f5f5; border-radius: 8px; overflow: hidden; position: relative; cursor: pointer; }
+    .product-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .product-card:hover img { transform: scale(1.05); }
+    .sold-out-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; font-size: 10px; font-weight: 700; border-radius: 4px; }
+    .product-info { margin-top: 15px; }
+    .product-name { font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+    .product-price { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+    .add-btn { width: 100%; background: var(--text); color: white; border: none; padding: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 4px; }
+    .add-btn:disabled { background: #ccc; cursor: not-allowed; }
 
     /* Modals */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.3);
-      z-index: 4000;
-      align-items: center;
-      justify-content: center;
-    }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; max-height: 90vh; overflow-y: auto; position: relative; }
+    .close-btn { position: absolute; top: 20px; right: 20px; font-size: 24px; background: none; border: none; cursor: pointer; }
+    
+    /* Cart Styles */
+    .cart-items { margin: 20px 0; }
+    .cart-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; border-bottom: 1px solid #f5f5f5; padding-bottom: 15px; }
+    .cart-item img { width: 60px; height: 80px; object-fit: cover; border-radius: 4px; }
+    .cart-item-info { flex: 1; }
+    .cart-item-name { font-size: 13px; font-weight: 600; text-transform: uppercase; }
+    .cart-item-price { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .remove-item { background: none; border: none; color: #999; cursor: pointer; font-size: 18px; }
+    .cart-footer { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+    .cart-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; margin-bottom: 20px; }
+    .whatsapp-btn { width: 100%; background: #25D366; color: white; border: none; padding: 15px; font-size: 14px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-    .modal.active {
-      display: flex;
-    }
+    /* Account Modal Notice */
+    .account-notice { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; color: #444; }
+    .admin-login-link { text-align: center; margin-top: 20px; }
+    .btn-text { background: none; border: none; text-decoration: underline; color: #999; cursor: pointer; font-size: 12px; }
 
-    .modal-content {
-      background: white;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-      padding: 40px;
-    }
+    /* Admin Form */
+    .account-form { display: grid; gap: 15px; margin-top: 20px; }
+    .form-group { display: grid; gap: 5px; }
+    .form-group label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+    .account-form input, .account-form select, .account-form textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+    .btn-black { background: var(--text); color: white; border: none; padding: 15px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 6px; }
 
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      font-size: 24px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .product-detail-image {
-      width: 100%;
-      aspect-ratio: 3/4;
-      background: #f7f7f7;
-      margin-bottom: 20px;
-    }
-
-    .product-detail-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .btn-black {
-      width: 100%;
-      background: black;
-      color: white;
-      border: none;
-      padding: 15px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-transform: uppercase;
-      margin-top: 20px;
-    }
-
-    /* Search Overlay */
-    .search-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 3500;
-      display: none;
-      padding: 40px;
-    }
-
-    .search-overlay.active {
-      display: block;
-    }
-
-    .search-input-wrapper {
-      display: flex;
-      align-items: center;
-      border-bottom: 2px solid black;
-      padding-bottom: 10px;
-    }
-
-    .search-input-wrapper input {
-      flex: 1;
-      border: none;
-      font-size: 24px;
-      outline: none;
-      font-weight: 600;
-    }
-
-    .account-tabs {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .account-tab {
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #444;
-      opacity: 0.7;
-    }
-
-    .account-tab.active {
-      color: var(--text);
-      opacity: 1;
-      text-decoration: underline;
-    }
-
-    .account-form {
-      display: grid;
-      gap: 16px;
-    }
-
-    .account-form input,
-    .account-form select {
-      width: 100%;
-      border: 1px solid #ddd;
-      padding: 12px 14px;
-      font-size: 14px;
-      border-radius: 8px;
-    }
-
-    .account-form button {
-      border: none;
-      background: var(--text);
-      color: white;
-      padding: 14px;
-      font-size: 14px;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 8px;
-    }
-
-    .account-form button.secondary {
-      background: transparent;
-      border: 1px solid var(--text);
-      color: var(--text);
-    }
-
-    .remember-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-    }
-
-    .remember-row input[type="checkbox"] {
-      width: auto;
-      margin: 0;
-    }
-
-    .admin-add-header-btn {
-      border: 1px solid var(--text);
-      background: transparent;
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      cursor: pointer;
-      display: none;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .account-note {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .account-message {
-      font-size: 14px;
-      color: var(--danger);
-      min-height: 22px;
-    }
-
-    .admin-panel {
-      display: grid;
-      gap: 24px;
-    }
-
-    .admin-controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .admin-controls button {
-      border: 1px solid #000;
-      background: transparent;
-      color: #000;
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 12px;
-      text-transform: uppercase;
-      border-radius: 8px;
-    }
-
-    .admin-panel section {
-      border: 1px solid #eee;
-      padding: 20px;
-      border-radius: 16px;
-      background: #fafafa;
-    }
-
-    .admin-panel table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    .admin-panel th,
-    .admin-panel td {
-      border: 1px solid #eee;
-      padding: 10px;
-      text-align: left;
-    }
-
-    .admin-panel th {
-      background: #f4f4f4;
-      font-weight: 700;
-    }
-
-    .admin-action {
-      border: none;
-      background: transparent;
-      color: var(--text);
-      cursor: pointer;
-      text-decoration: underline;
-      padding: 0;
-      font-size: 12px;
-    }
-
-    /* Footer */
-    footer {
-      padding: 60px 0;
-      border-top: 1px solid #f0f0f0;
-      text-align: center;
-    }
-
-    footer p {
-      font-size: 12px;
-      color: #999;
-      letter-spacing: 0.5px;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-      .product-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-      .header-content {
-        padding: 12px 0;
-      }
-      .logo {
-        font-size: 16px;
-      }
-      .header-right .icon-btn:not(.cart-btn) {
-        display: none;
-      }
-      .header-right .cart-btn {
-        display: none;
-      }
-      .hamburger {
-        display: none !important;
-      }
-      .mobile-bottom-nav {
-        display: flex;
-      }
-      .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px 10px;
-      }
-      .hero {
-        height: 50vh;
-      }
-      .hero-content h1 {
-        font-size: 28px;
-      }
-    }
+    /* Mobile Nav */
+    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 10px 0; z-index: 1000; justify-content: space-around; }
+    @media (max-width: 768px) { .mobile-nav { display: flex; } }
   </style>
 </head>
 <body>
   <header>
     <div class="container">
       <div class="header-content">
-        <div class="header-left">
-          <button class="icon-btn hamburger" onclick="openSideMenu()">☰</button>
-          <a href="#" class="logo">Really Brand</a>
-        </div>
-        <div class="header-right">
-          <button id="admin-add-header-btn" class="admin-add-header-btn" onclick="openAdminAddSection()">＋ Товар</button>
-          <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+        <a href="index.html" class="logo">Really Brand</a>
+        <div class="header-right" id="header-right">
+          <!-- Admin button injected here -->
           <button class="icon-btn" onclick="openAccount()">👤</button>
           <button class="icon-btn cart-btn" onclick="openCart()">
-            🛒
-            <span class="cart-count" id="cart-count">1</span>
+            🛒 <span class="cart-count">0</span>
           </button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Mobile Bottom Nav -->
-  <nav class="mobile-bottom-nav">
-    <button class="nav-item" onclick="openSideMenu()">☰</button>
-    <button class="nav-item" onclick="toggleSearch()">🔍</button>
-    <button class="nav-item" onclick="openAccount()">👤</button>
-    <button class="nav-item cart-btn" onclick="openCart()">
-      🛒
-      <span class="cart-count" id="cart-count-mobile">1</span>
-    </button>
-  </nav>
-
-  <div class="side-menu" id="side-menu">
-    <button class="close-btn" onclick="closeSideMenu()">×</button>
-    <ul>
-      <li><a href="#" onclick="filterProducts('tops'); closeSideMenu();">Верхняя одежда</a></li>
-      <li><a href="#" onclick="filterProducts('bottoms'); closeSideMenu();">Брюки</a></li>
-      <li><a href="#" onclick="filterProducts('shoes'); closeSideMenu();">Обувь</a></li>
-      <li><a href="#" onclick="filterProducts('bags'); closeSideMenu();">Сумки</a></li>
-    </ul>
-  </div>
-
-  <div class="search-overlay" id="search-overlay">
-    <button class="modal-close" onclick="toggleSearch()">×</button>
-    <div class="search-input-wrapper">
-      <input type="text" id="search-input" placeholder="Поиск..." oninput="searchProducts()">
+  <section class="hero">
+    <img src="hero-image.jpg" alt="Hero">
+    <div class="hero-content">
+      <h1 style="font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: 5px;">New Era</h1>
     </div>
-  </div>
+  </section>
 
+  <main class="container">
+    <section class="new-section" id="new-section">
+      <h2>Новинки</h2>
+      <div class="new-products-scroll" id="new-products-scroll">
+        <!-- New items -->
+      </div>
+    </section>
+
+    <section class="category-section">
+      <div class="category-tabs" id="category-tabs">
+        <span class="category-tab active" data-category="all">Все</span>
+        <span class="category-tab" data-category="tops">Верхняя одежда</span>
+        <span class="category-tab" data-category="bottoms">Брюки</span>
+        <span class="category-tab" data-category="shoes">Обувь</span>
+        <span class="category-tab" data-category="bags">Сумки</span>
+      </div>
+    </section>
+
+    <section class="products">
+      <div class="product-grid" id="product-grid">
+        <!-- Products -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modals -->
   <div class="modal" id="account-modal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('account-modal')">×</button>
+      <button class="close-btn" onclick="closeModal('account-modal')">×</button>
       <div id="account-modal-body"></div>
     </div>
   </div>
 
-  <section class="hero">
-    <img src="https://raw.githubusercontent.com/illa-33/product-builder/main/brand.png" alt="home">
-    <div class="hero-content">
-      <h1></h1>
-      <p></p>
-      <button class="btn-black" onclick="filterProducts('all'); closeSideMenu();">Посмотреть коллекцию</button>
-    </div>
-  </section>
-
-  <section class="category-section">
-    <div class="container">
-      <div class="category-tabs" id="category-tabs">
-        <span class="category-tab active" data-category="all" onclick="filterProducts('all')">Все</span>
-        <span class="category-tab" data-category="tops" onclick="filterProducts('tops')">Верхняя одежда</span>
-        <span class="category-tab" data-category="bottoms" onclick="filterProducts('bottoms')">Брюки</span>
-        <span class="category-tab" data-category="shoes" onclick="filterProducts('shoes')">Обувь</span>
-        <span class="category-tab" data-category="bags" onclick="filterProducts('bags')">Сумки</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="products" id="products">
-    <div class="container">
-      <div class="product-grid" id="product-grid"></div>
-    </div>
-  </section>
-
-  <!-- Product Modal -->
-  <div class="modal" id="product-modal">
-    <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('product-modal')">×</button>
-      <div id="product-modal-body"></div>
-      <button class="btn-black" onclick="addToCartFromModal()">В корзину</button>
-    </div>
-  </div>
-
-  <!-- Cart Modal -->
   <div class="modal" id="cart-modal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('cart-modal')">×</button>
-      <h3>КОРЗИНА</h3>
-      <div id="cart-items" style="margin-top: 20px;"></div>
-      <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-        <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 8px;">
-          <span>Товары</span>
-          <span id="cart-subtotal">₽ 0</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-          <span>Доставка</span>
-          <span id="cart-shipping">₽ 0</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 20px;">
+      <button class="close-btn" onclick="closeModal('cart-modal')">×</button>
+      <h3 style="text-transform: uppercase; letter-spacing: 1px;">Корзина</h3>
+      <div id="cart-items" class="cart-items"></div>
+      <div class="cart-footer">
+        <div class="cart-total">
           <span>Итого</span>
           <span id="cart-total">₽ 0</span>
         </div>
-        <button class="btn-black" onclick="checkout()">Оформить заказ</button>
-        <button class="btn-black" onclick="sendWhatsApp()" style="margin-top:10px; background:#25D366;">Отправить WhatsApp</button>
+        <button class="whatsapp-btn" onclick="sendWhatsApp()">
+          Заказать через WhatsApp
+        </button>
       </div>
     </div>
   </div>
 
-  <footer>
-    <div class="container">
-      <p>© 2026 ОРИГИНАЛ МЕНС. Все права защищены.</p>
-    </div>
+  <div class="mobile-nav">
+    <button class="icon-btn" onclick="location.href='index.html'">🏠</button>
+    <button class="icon-btn" onclick="openAccount()">👤</button>
+    <button class="icon-btn cart-btn" onclick="openCart()">
+      🛒 <span class="cart-count">0</span>
+    </button>
+  </div>
+
+  <footer style="padding: 60px 0; text-align: center; border-top: 1px solid var(--border); margin-top: 40px;">
+    <p style="font-size: 12px; color: #999;">© 2026 Really Brand. Все права защищены.</p>
   </footer>
 
-  <script>
-    const usersKey = 'rb_users';
-    const ordersKey = 'rb_orders';
-    const cartKey = 'rb_cart';
-    const productsKey = 'rb_products';
-    const sessionUserKey = 'rb_session_user';
-    const savedCustomerKey = 'rb_saved_customer';
-    const whatsappNumber = '821068448600';
-    const defaultUsers = [
-      { username: 'islam0814', password: '01068448600', role: 'admin', name: 'islam0814', phone: '01068448600', email: 'admin@originalmens.ru' },
-      { username: 'guest', password: 'guest1234', role: 'customer', name: 'Гость', phone: '', email: 'guest@originalmens.ru' }
-    ];
-    const defaultProducts = [
-      { id: 1, category: 'tops', title: 'Техническая куртка', price: 1250000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80', images: ['https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['S', 'M', 'L', 'XL'] } },
-      { id: 2, category: 'tops', title: 'Лёгкий пуховик', price: 1850000, color: 'Синий', image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80', images: ['https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=800&q=80'], options: { colors: ['Синий'], sizes: ['M', 'L', 'XL'] } },
-      { id: 3, category: 'tops', title: 'Пальто из шерсти', price: 2450000, color: 'Кэмел', image: 'https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80', images: ['https://images.unsplash.com/photo-1539533377285-b0bd362eb23d?w=800&q=80'], options: { colors: ['Кэмел'], sizes: ['L', 'XL'] } },
-      { id: 4, category: 'bottoms', title: 'Брюки узкого кроя', price: 450000, color: 'Тёмно-серый', image: 'https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80', images: ['https://images.unsplash.com/photo-1624371414361-e6e8ea02c1e2?w=800&q=80'], options: { colors: ['Тёмно-серый'], sizes: ['30', '32', '34', '36'] } },
-      { id: 5, category: 'bottoms', title: 'Хлопковые чиносы', price: 380000, color: 'Бежевый', image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80', images: ['https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=800&q=80'], options: { colors: ['Бежевый'], sizes: ['30', '32', '34'] } },
-      { id: 6, category: 'shoes', title: 'Кожаные кроссовки', price: 750000, color: 'Белый', image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80', images: ['https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&q=80'], options: { colors: ['Белый'], sizes: ['40', '41', '42', '43', '44'] } },
-      { id: 7, category: 'shoes', title: 'Ботинки челси', price: 950000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80', images: ['https://images.unsplash.com/photo-1638247025967-b4e38f787b76?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['40', '41', '42', '43'] } },
-      { id: 8, category: 'bags', title: 'Нейлоновый рюкзак', price: 1100000, color: 'Чёрный', image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80', images: ['https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80'], options: { colors: ['Чёрный'], sizes: ['One Size'] } }
-    ];
-
-    let products = loadProducts();
-
-    let cart = loadCart();
-    let currentProduct = null;
-    let currentFilter = 'all';
-    let searchQuery = '';
-    let loggedInUser = null;
-    let adminSection = 'products';
-    let editingProductId = null;
-    let currentImageIndex = 0;
-
-    function loadUsers() {
-      const stored = localStorage.getItem(usersKey);
-      if (!stored) {
-        saveUsers(defaultUsers.slice());
-        return defaultUsers.slice();
-      }
-      try {
-        const users = JSON.parse(stored);
-        if (!Array.isArray(users) || users.length === 0) {
-          saveUsers(defaultUsers.slice());
-          return defaultUsers.slice();
-        }
-        const adminIndex = users.findIndex(u => u.username === 'islam0814');
-        if (adminIndex === -1) {
-          users.unshift(defaultUsers[0]);
-          saveUsers(users);
-        } else {
-          const admin = users[adminIndex];
-          if (admin.password !== defaultUsers[0].password || admin.phone !== defaultUsers[0].phone) {
-            users[adminIndex] = { ...admin, password: defaultUsers[0].password, phone: defaultUsers[0].phone, role: 'admin', name: 'islam0814', email: defaultUsers[0].email };
-            saveUsers(users);
-          }
-        }
-        return users;
-      } catch (e) {
-        saveUsers(defaultUsers.slice());
-        return defaultUsers.slice();
-      }
-    }
-
-    function saveUsers(users) {
-      localStorage.setItem(usersKey, JSON.stringify(users));
-    }
-
-    function loadProducts() {
-      const stored = localStorage.getItem(productsKey);
-      return stored ? JSON.parse(stored) : defaultProducts.slice();
-    }
-
-    function saveProducts(prods) {
-      localStorage.setItem(productsKey, JSON.stringify(prods));
-    }
-
-    function loadOrders() {
-      const stored = localStorage.getItem(ordersKey);
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    function saveOrders(orders) {
-      localStorage.setItem(ordersKey, JSON.stringify(orders));
-    }
-
-    function loadCart() {
-      const stored = localStorage.getItem(cartKey);
-      return stored ? JSON.parse(stored) : [];
-    }
-
-    function saveCart(cartItems) {
-      localStorage.setItem(cartKey, JSON.stringify(cartItems));
-    }
-
-    function saveCurrentUser(user) {
-      if (!user) {
-        localStorage.removeItem(sessionUserKey);
-        return;
-      }
-      localStorage.setItem(sessionUserKey, JSON.stringify(user));
-    }
-
-    function loadCurrentUser() {
-      const stored = localStorage.getItem(sessionUserKey);
-      return stored ? JSON.parse(stored) : null;
-    }
-
-    function clearCurrentUser() {
-      localStorage.removeItem(sessionUserKey);
-      loggedInUser = null;
-    }
-
-    function saveCustomerInfo(name, phone, remember) {
-      if (!remember) {
-        localStorage.removeItem(savedCustomerKey);
-        return;
-      }
-      localStorage.setItem(savedCustomerKey, JSON.stringify({ name, phone }));
-    }
-
-    function loadCustomerInfo() {
-      const stored = localStorage.getItem(savedCustomerKey);
-      return stored ? JSON.parse(stored) : null;
-    }
-
-    function getUsers() {
-      const users = loadUsers();
-      if (!users || users.length === 0) {
-        saveUsers(defaultUsers);
-        return defaultUsers.slice();
-      }
-      return users;
-    }
-
-    function getOrders() {
-      return loadOrders();
-    }
-
-    function showNotification(message) {
-      alert(message);
-    }
-
-    function openSideMenu() {
-      document.getElementById('side-menu').classList.add('open');
-    }
-
-    function closeSideMenu() {
-      document.getElementById('side-menu').classList.remove('open');
-    }
-
-    function toggleSearch() {
-      const overlay = document.getElementById('search-overlay');
-      overlay.classList.toggle('active');
-      if (!overlay.classList.contains('active')) {
-        document.getElementById('search-input').value = '';
-        searchQuery = '';
-        renderProducts();
-      }
-    }
-
-    function filterProducts(category) {
-      currentFilter = category;
-      document.querySelectorAll('.category-tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.category === category);
-      });
-      renderProducts();
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      const filtered = products
-        .filter(p => p.visible !== false)
-        .filter(p => currentFilter === 'all' || p.category === currentFilter)
-        .filter(p => p.title.toLowerCase().includes(searchQuery));
-
-      grid.innerHTML = filtered.map(p => `
-        <div class="product-card" onclick="openProductPage(${p.id})">
-          <div class="product-image">
-            <img src="${p.image}" alt="${p.title}">
-          </div>
-          <div class="product-info">
-            <div class="product-title">${p.title}</div>
-            <div class="product-price">₽ ${p.price.toLocaleString()}</div>
-            <div class="product-color">${p.color}</div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openProductPage(id) {
-      window.location.href = `product.html?id=${id}`;
-    }
-
-    function addToCartFromModal() {
-      if (!currentProduct) return;
-      addToCart(currentProduct.id, 1);
-      closeModal('product-modal');
-    }
-
-    function addToCart(productId, quantity = 1) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-      const existing = cart.find(item => item.id === productId);
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
-        cart.push({ ...product, quantity });
-      }
-      saveCart(cart);
-      updateCartUI();
-      showNotification('Товар добавлен в корзину');
-    }
-
-    function updateCartUI() {
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-      document.getElementById('cart-count').textContent = count;
-      document.getElementById('cart-count-mobile').textContent = count;
-      const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const shipping = 500; // 무조건 500루블
-      const total = subtotal + shipping;
-      document.getElementById('cart-subtotal').textContent = `₽ ${subtotal.toLocaleString()}`;
-      document.getElementById('cart-shipping').textContent = `₽ ${shipping.toLocaleString()} (Доставка)`;
-      document.getElementById('cart-total').textContent = `₽ ${total.toLocaleString()}`;
-    }
-
-    function openCart() {
-      renderCartItems();
-      updateCartUI();
-      document.getElementById('cart-modal').classList.add('active');
-    }
-
-    function renderCartItems() {
-      const container = document.getElementById('cart-items');
-      if (!cart.length) {
-        container.innerHTML = '<p>Корзина пуста</p>';
-        return;
-      }
-      container.innerHTML = cart.map(item => `
-        <div style="display:flex; gap:15px; margin-bottom:15px; align-items:center;">
-          <img src="${item.image}" style="width:60px; height:80px; object-fit:cover; border-radius:8px;">
-          <div style="flex:1;">
-            <div style="font-weight:600; font-size:12px;">${item.title}</div>
-            <div style="font-size:12px;">₽ ${item.price.toLocaleString()} x ${item.quantity}</div>
-          </div>
-          <button class="admin-action" style="font-size:12px;" onclick="removeFromCart(${item.id})">Удалить</button>
-        </div>
-      `).join('');
-    }
-
-    function removeFromCart(productId) {
-      cart = cart.filter(item => item.id !== productId);
-      saveCart(cart);
-      updateCartUI();
-      renderCartItems();
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    function openAccount() {
-      renderAccountModal();
-      document.getElementById('account-modal').classList.add('active');
-    }
-
-    function logout() {
-      clearCurrentUser();
-      renderAccountModal();
-      showNotification('Вы вышли из системы');
-      closeModal('account-modal');
-    }
-
-    function renderAccountModal() {
-      const body = document.getElementById('account-modal-body');
-      if (!body) return;
-      if (loggedInUser) {
-        body.innerHTML = `
-          <div class="account-tabs">
-            <span class="account-tab active">Привет, ${loggedInUser.name}</span>
-          </div>
-          ${loggedInUser.role === 'admin' ? renderAdminPanel() : renderUserPanel()}
-        `;
-        updateAdminHeaderButton();
-        return;
-      }
-      updateAdminHeaderButton();
-      const savedCustomer = loadCustomerInfo();
-      body.innerHTML = `
-        <div class="account-tabs">
-          <span class="account-tab active">Вход</span>
-        </div>
-        <div id="auth-form" class="account-form"></div>
-        <div class="account-message" id="auth-message"></div>
-      `;
-      document.getElementById('auth-form').innerHTML = `
-          <input id="login-username" placeholder="Имя" value="${savedCustomer ? savedCustomer.name : ''}" />
-          <input id="login-password" type="password" placeholder="Телефон" value="${savedCustomer ? savedCustomer.phone : ''}" />
-          <label class="remember-row">
-            <input type="checkbox" id="remember-me" ${savedCustomer ? 'checked' : ''} />
-            <span>Сохранить информацию</span>
-          </label>
-          <button onclick="submitLogin()">Войти</button>
-          <p class="account-note"></p>
-      `;
-    }
-
-    function submitLogin() {
-      const name = document.getElementById('login-username').value.trim();
-      const phone = document.getElementById('login-password').value.trim();
-      const remember = document.getElementById('remember-me').checked;
-      const message = document.getElementById('auth-message');
-      if (!name || !phone) {
-        message.textContent = 'Введите имя и телефон';
-        return;
-      }
-
-      const users = getUsers();
-      let user = users.find(u => (u.username === name || u.email === name || u.name === name) && u.password === phone);
-      if (!user) {
-        user = users.find(u => u.name === name && u.phone === phone);
-      }
-
-      if (!user) {
-        const username = name.toLowerCase().replace(/\s+/g, '_');
-        user = { username, password: phone, role: 'customer', name, phone, email: '' };
-        users.push(user);
-        saveUsers(users);
-      }
-
-      loggedInUser = user;
-      saveCurrentUser(user);
-      saveCustomerInfo(name, phone, remember);
-      showNotification(`Добро пожаловать, ${user.name}`);
-      renderAccountModal();
-    }
-
-    function renderUserPanel() {
-      return `
-        <div class="account-form">
-          <div>Имя: ${loggedInUser.name}</div>
-          <div>Телефон: ${loggedInUser.phone || 'не указан'}</div>
-          <button onclick="logout()">Выйти</button>
-        </div>
-      `;
-    }
-
-    function renderAdminPanel() {
-      const orders = getOrders();
-      const users = getUsers();
-      return `
-        <div class="admin-panel">
-          <div class="admin-controls">
-            <button onclick="setAdminSection('products')">Товары</button>
-            <button onclick="setAdminSection('orders')">Заказы</button>
-            <button onclick="setAdminSection('members')">Пользователи</button>
-          </div>
-          ${adminSection === 'products' ? renderAdminProducts() : ''}
-          ${adminSection === 'orders' ? renderAdminOrders(orders) : ''}
-          ${adminSection === 'members' ? renderAdminMembers(users) : ''}
-          <button onclick="logout()">Выйти</button>
-        </div>
-      `;
-    }
-
-    function setAdminSection(section) {
-      adminSection = section;
-      renderAccountModal();
-    }
-
-    function renderAdminProducts() {
-      const productRows = products.map(product => `
-        <tr>
-          <td>${product.id}</td>
-          <td>${product.title}</td>
-          <td>₽ ${product.price.toLocaleString()}</td>
-          <td>${product.category}</td>
-          <td>${product.visible === false ? 'Скрыт' : 'Виден'}</td>
-          <td><button class="admin-action" onclick="editProduct(${product.id})">Изменить</button></td>
-          <td><button class="admin-action" onclick="toggleProductVisibility(${product.id})">${product.visible === false ? 'Показать' : 'Скрыть'}</button></td>
-          <td><button class="admin-action" onclick="deleteProduct(${product.id})">Удалить</button></td>
-        </tr>
-      `).join('');
-      return `
-        <section>
-          <h4>Управление товарами</h4>
-          <form class="account-form" onsubmit="event.preventDefault(); addNewProduct();">
-            <input id="new-title" placeholder="Название товара" />
-            <input id="new-price" type="number" placeholder="Цена ₽" />
-            <input id="new-color" placeholder="Цвет" />
-            <input id="new-image" placeholder="URL изображения (или выберите файл)" />
-            <input type="file" id="new-image-file" accept="image/*,video/*" multiple />
-            <input id="new-detail-images" placeholder="Доп. фото URL через запятую" />
-            <input id="new-description" placeholder="Описание товара" />
-            <input id="new-colors" placeholder="Цвета (через запятую)" />
-            <input id="new-sizes" placeholder="Размеры (через запятую)" />
-            <select id="new-category">
-              <option value="tops">Верхняя одежда</option>
-              <option value="bottoms">Брюки</option>
-              <option value="shoes">Обувь</option>
-              <option value="bags">Сумки</option>
-            </select>
-            <input type="hidden" id="edit-product-id" value="" />
-            <button type="submit">${editingProductId ? 'Сохранить изменения' : 'Добавить товар'}</button>
-          </form>
-          <table style="margin-top:20px; width:100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                <th>ID</th><th>Название</th><th>Цена</th><th>Категория</th><th>Статус</th><th>Скрыть / Показать</th><th>Удалить</th>
-              </tr>
-            </thead>
-            <tbody>${productRows}</tbody>
-          </table>
-        </section>
-      `;
-    }
-
-    function renderAdminOrders(orders) {
-      if (!orders.length) {
-        return `<section><h4>Заказы</h4><p>Заказов нет</p></section>`;
-      }
-      return `
-        <section>
-          <h4>Управление заказами</h4>
-          <table>
-            <thead><tr><th>ID</th><th>Пользователь</th><th>Товаров</th><th>Сумма</th><th>Статус</th></tr></thead>
-            <tbody>
-              ${orders.map((order, index) => `<tr><td>${index + 1}</td><td>${order.user}</td><td>${order.items.length}</td><td>₽ ${order.total.toLocaleString()}</td><td>${order.status}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </section>
-      `;
-    }
-
-    function renderAdminMembers(users) {
-      return `
-        <section>
-          <h4>Управление пользователями</h4>
-          <table>
-            <thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Действие</th></tr></thead>
-            <tbody>
-              ${users.map(user => `<tr><td>${user.name}</td><td>${user.email}</td><td>${user.role}</td><td>${user.username !== 'islam0814' ? `<button class="admin-action" onclick="deleteUser('${user.username}')">Удалить</button>` : '---'}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </section>
-      `;
-    }
-
-    function addNewProduct() {
-      const title = document.getElementById('new-title').value.trim();
-      const price = Number(document.getElementById('new-price').value);
-      const color = document.getElementById('new-color').value.trim();
-      const imageUrl = document.getElementById('new-image').value.trim();
-      const imageFile = document.getElementById('new-image-file').files;
-      const colorsInput = document.getElementById('new-colors').value.trim();
-      const sizesInput = document.getElementById('new-sizes').value.trim();
-      const description = document.getElementById('new-description').value.trim();
-      const detailImagesInput = document.getElementById('new-detail-images').value.trim();
-      const category = document.getElementById('new-category').value;
-      const editId = document.getElementById('edit-product-id').value;
-
-      let images = [];
-      if (imageUrl) {
-        images.push(imageUrl);
-      }
-      if (imageFile.length > 0) {
-        for (let file of imageFile) {
-          const url = URL.createObjectURL(file);
-          images.push(url);
-        }
-      }
-      if (images.length === 0) {
-        showNotification('Добавьте изображение (URL или файл)');
-        return;
-      }
-
-      const colors = colorsInput ? colorsInput.split(',').map(c => c.trim()).filter(Boolean) : (color ? [color] : []);
-      const sizes = sizesInput ? sizesInput.split(',').map(s => s.trim()).filter(Boolean) : ['One Size'];
-      const detailImages = detailImagesInput ? detailImagesInput.split(',').map(url => url.trim()).filter(Boolean) : [];
-
-      if (!title || !price || colors.length === 0) {
-        showNotification('Заполните все поля товара');
-        return;
-      }
-
-      const maxId = products.reduce((max, item) => Math.max(max, item.id), 0);
-      if (editId) {
-        const existingProduct = products.find(p => p.id === Number(editId));
-        if (existingProduct) {
-          existingProduct.title = title;
-          existingProduct.price = price;
-          existingProduct.color = colors[0];
-          existingProduct.category = category;
-          existingProduct.description = description;
-          existingProduct.detailImages = detailImages;
-          existingProduct.options = { colors, sizes };
-          if (images.length) existingProduct.images = images;
-          if (images[0]) existingProduct.image = images[0];
-          saveProducts(products);
-          editingProductId = null;
-          showNotification('Товар изменён');
-          renderProducts();
-          renderAccountModal();
-          return;
-        }
-      }
-
-      products.push({
-        id: maxId + 1,
-        category,
-        title,
-        price,
-        color: colors[0],
-        image: images[0],
-        images,
-        detailImages,
-        description,
-        options: { colors, sizes }
-      });
-      saveProducts(products);
-      renderProducts();
-      showNotification('Товар добавлен');
-      renderAccountModal();
-    }
-
-    function checkout() {
-      if (!loggedInUser) {
-        showNotification('Пожалуйста, войдите, чтобы оформить заказ');
-        return;
-      }
-      if (!cart.length) {
-        showNotification('Ваша корзина пуста');
-        return;
-      }
-      const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const shipping = 500; // 무조건 500루블
-      const total = subtotal + shipping;
-      const orders = getOrders();
-      orders.push({ user: loggedInUser.username, items: cart.slice(), subtotal, shipping, total, status: 'Новый' });
-      saveOrders(orders);
-      cart = [];
-      saveCart(cart);
-      updateCartUI();
-      renderCartItems();
-      showNotification('Заказ оформлен. Спасибо!');
-      closeModal('cart-modal');
-    }
-
-    function getCustomerInfo() {
-      return loggedInUser || loadCustomerInfo() || { name: 'Не указан', phone: 'Не указан' };
-    }
-
-    function editProduct(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-      adminSection = 'products';
-      editingProductId = productId;
-      renderAccountModal();
-      setTimeout(() => {
-        document.getElementById('new-title').value = product.title;
-        document.getElementById('new-price').value = product.price;
-        document.getElementById('new-color').value = product.color;
-        document.getElementById('new-image').value = product.image;
-        document.getElementById('new-description').value = product.description || '';
-        document.getElementById('new-detail-images').value = (product.detailImages || []).join(', ');
-        document.getElementById('new-colors').value = (product.options?.colors || []).join(', ');
-        document.getElementById('new-sizes').value = (product.options?.sizes || []).join(', ');
-        document.getElementById('new-category').value = product.category;
-        document.getElementById('edit-product-id').value = product.id;
-        const submitBtn = document.querySelector('#account-modal .account-form button');
-        if (submitBtn) submitBtn.textContent = 'Сохранить изменения';
-      }, 50);
-    }
-
-    function toggleProductVisibility(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-      product.visible = product.visible === false ? true : false;
-      saveProducts(products);
-      renderProducts();
-      renderAccountModal();
-    }
-
-    function deleteProduct(productId) {
-      products = products.filter(p => p.id !== productId);
-      saveProducts(products);
-      renderProducts();
-      renderAccountModal();
-    }
-
-    function deleteUser(username) {
-      const users = getUsers().filter(user => user.username !== username);
-      saveUsers(users);
-      renderAccountModal();
-    }
-
-    function buildWhatsAppMessage() {
-      const customer = getCustomerInfo();
-      const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const shipping = 500;
-      const total = subtotal + shipping;
-      const items = cart.length ? cart.map(item => `- ${item.title} x${item.quantity} (${item.price.toLocaleString()}₽)`).join('\n') : '- Корзина пуста';
-      const text = `* [주문 생성] *\nИмя: ${customer.name}\nКонтакт: ${customer.phone}\nЗаказ:\n${items}\nДоставка включена общая сумма: ₽ ${total.toLocaleString()}`;
-      return encodeURIComponent(text);
-    }
-
-    function updateAdminHeaderButton() {
-      const btn = document.getElementById('admin-add-header-btn');
-      if (!btn) return;
-      btn.style.display = loggedInUser && loggedInUser.role === 'admin' ? 'flex' : 'none';
-    }
-
-    function openAdminAddSection() {
-      adminSection = 'products';
-      editingProductId = null;
-      renderAccountModal();
-      openAccount();
-      setTimeout(() => {
-        const form = document.getElementById('new-title');
-        if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 50);
-    }
-
-    function sendWhatsApp() {
-      const msg = buildWhatsAppMessage();
-      window.open(`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${msg}`, '_blank');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const currentUser = loadCurrentUser();
-      if (currentUser) {
-        loggedInUser = currentUser;
-      }
-      renderProducts();
-      updateCartUI();
-      updateAdminHeaderButton();
-    });
-  </script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
 </body>
 </html>
