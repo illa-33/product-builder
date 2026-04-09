@@ -52,10 +52,14 @@ function renderAdminForm(product = null) {
       <div class="form-group">
         <label>Категория</label>
         <select id="p-category" required>
-          <option value="tops" ${product?.category === 'tops' ? 'selected' : ''}>Верхняя одежда</option>
-          <option value="bottoms" ${product?.category === 'bottoms' ? 'selected' : ''}>Брюки</option>
+          <option value="outer" ${product?.category === 'outer' ? 'selected' : ''}>Аутер</option>
+          <option value="tops" ${product?.category === 'tops' ? 'selected' : ''}>Верх</option>
+          <option value="bottoms" ${product?.category === 'bottoms' ? 'selected' : ''}>Низ</option>
           <option value="shoes" ${product?.category === 'shoes' ? 'selected' : ''}>Обувь</option>
           <option value="bags" ${product?.category === 'bags' ? 'selected' : ''}>Сумки</option>
+          <option value="hats" ${product?.category === 'hats' ? 'selected' : ''}>Шапки</option>
+          <option value="sports" ${product?.category === 'sports' ? 'selected' : ''}>Спорт</option>
+          <option value="accessories" ${product?.category === 'accessories' ? 'selected' : ''}>Аксессуары</option>
         </select>
       </div>
       <div class="form-group">

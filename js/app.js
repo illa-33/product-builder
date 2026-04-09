@@ -1,6 +1,9 @@
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('rb_cart')) || [];
 const whatsappNumber = '821068448600';
+const SHIPPING_FEE = 500;
+let currentCategory = 'all';
+let searchQuery = '';
 
 async function init() {
   await loadProducts();
@@ -44,10 +47,14 @@ function renderProductGrid(category = 'all') {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
-  let filtered = allProducts;
-  if (category !== 'all') {
-    filtered = allProducts.filter(p => p.category === category);
-  }
+  currentCategory = category;
+  const isAdmin = sessionStorage.getItem('rb_admin') === 'true';
+
+  let filtered = allProducts.filter(p => {
+    const matchCategory = (category === 'all' || p.category === category);
+    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCategory && matchSearch;
+  });
 
   // Sort: sold out at bottom, then latest
   const sorted = filtered.sort((a, b) => {
@@ -67,6 +74,13 @@ function renderProductGrid(category = 'all') {
           <div class="product-name">${p.name}</div>
           <div class="product-price">₽ ${p.price.toLocaleString()}</div>
         </div>
+        ${isAdmin ? `
+          <div class="admin-product-actions">
+            <button onclick="editProductFromGrid('${p.id}')">Изменить</button>
+            <button class="btn-delete" onclick="deleteProductFromGrid('${p.id}')">Удалить</button>
+            <button class="btn-soldout" onclick="toggleSoldOutStatus('${p.id}', ${p.is_sold_out})">${p.is_sold_out ? 'В наличии' : 'Нет в наличии'}</button>
+          </div>
+        ` : ''}
         <button class="add-btn" onclick="addToCart('${p.id}')" ${p.is_sold_out ? 'disabled' : ''}>
           ${p.is_sold_out ? 'Нет в наличии' : 'В корзину'}
         </button>
@@ -79,13 +93,17 @@ function setupEventListeners() {
   // Category tabs
   document.querySelectorAll('.category-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
-      const cat = e.target.dataset.category;
+      const cat = e.currentTarget.dataset.category;
       document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-      e.target.classList.add('active');
+      e.currentTarget.classList.add('active');
       renderProductGrid(cat);
     });
   });
 }
+
+window.toggleSideMenu = () => {
+  document.getElementById('side-menu').classList.toggle('active');
+};
 
 function addToCart(id) {
   const product = allProducts.find(p => p.id === id);
@@ -108,6 +126,17 @@ function addToCart(id) {
   openCart();
 }
 
+window.changeQuantity = (id, delta) => {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.quantity += delta;
+  if (item.quantity <= 0) {
+    cart = cart.filter(i => i.id !== id);
+  }
+  saveCart();
+  updateCartUI();
+};
+
 function removeFromCart(id) {
   cart = cart.filter(item => item.id !== id);
   saveCart();
@@ -129,6 +158,11 @@ function updateCartUI() {
           <div class="cart-item-info">
             <div class="cart-item-name">${item.name}</div>
             <div class="cart-item-price">₽ ${item.price.toLocaleString()} x ${item.quantity}</div>
+            <div class="quantity-controls-mini">
+              <button onclick="changeQuantity('${item.id}', -1)">-</button>
+              <span>${item.quantity}</span>
+              <button onclick="changeQuantity('${item.id}', 1)">+</button>
+            </div>
           </div>
           <button class="remove-item" onclick="removeFromCart('${item.id}')">×</button>
         </div>
@@ -136,7 +170,15 @@ function updateCartUI() {
     }
   }
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const goodsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = goodsTotal + SHIPPING_FEE;
+
+  if (document.getElementById('cart-goods-total')) {
+    document.getElementById('cart-goods-total').innerText = `₽ ${goodsTotal.toLocaleString()}`;
+  }
+  if (document.getElementById('cart-shipping')) {
+    document.getElementById('cart-shipping').innerText = `₽ ${SHIPPING_FEE.toLocaleString()}`;
+  }
   const totalEl = document.getElementById('cart-total');
   if (totalEl) totalEl.innerText = `₽ ${total.toLocaleString()}`;
 }
@@ -151,12 +193,14 @@ function sendWhatsApp() {
     return;
   }
 
-  const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const goodsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = goodsTotal + SHIPPING_FEE;
+
   let msg = `[ORDER]\n`;
   cart.forEach(item => {
     msg += `- ${item.name} x ${item.quantity}\n`;
   });
-  msg += `\nTOTAL: ₽ ${total.toLocaleString()}`;
+  msg += `\nТовары: ₽ ${goodsTotal.toLocaleString()}\nДоставка: ₽ ${SHIPPING_FEE.toLocaleString()}\nИтого: ₽ ${total.toLocaleString()}`;
 
   const encodedMsg = encodeURIComponent(msg);
   window.open(`https://wa.me/${whatsappNumber}?text=${encodedMsg}`);
@@ -189,9 +233,9 @@ function renderAccountContent() {
   const container = document.getElementById('account-modal-body');
   container.innerHTML = `
     <div class="account-notice">
-      <p>"Вы можете сделать заказ без регистрации.<br>
+      <p>Вы можете сделать заказ без регистрации.<br>
       Добавьте нужные товары в корзину и отправьте заказ через WhatsApp.<br>
-      Стоимость доставки оплачивается один раз за заказ."</p>
+      Стоимость доставки оплачивается один раз за заказ. (₽500)</p>
     </div>
     <div class="admin-login-link">
       <button onclick="showAdminLogin()" class="btn-text">Вход для администратора</button>

@@ -8,14 +8,18 @@
   <link rel="stylesheet" href="css/style.css">
   <style>
     .product-detail-container { padding: 40px 0; display: grid; gap: 40px; }
-    @media (min-width: 768px) {
-      .product-detail-container { grid-template-columns: 1fr 1fr; }
-    }
+    @media (min-width: 768px) { .product-detail-container { grid-template-columns: 1.2fr 1fr; } }
     .product-detail-media img, .product-detail-media video { width: 100%; border-radius: 12px; }
-    .product-detail-info h1 { font-size: 28px; text-transform: uppercase; margin-bottom: 10px; }
-    .product-detail-price { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+    .product-detail-info h1 { font-size: 24px; text-transform: uppercase; margin-bottom: 10px; font-weight: 900; }
+    .product-detail-price { font-size: 22px; font-weight: 700; margin-bottom: 30px; }
+    .option-group { margin-bottom: 25px; }
+    .option-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+    .option-list { display: flex; gap: 10px; flex-wrap: wrap; }
+    .option-item { padding: 10px 20px; border: 1px solid #eee; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .option-item.selected { border-color: #000; background: #000; color: #fff; }
     .product-detail-description { margin-top: 40px; line-height: 1.8; color: #444; }
-    .product-detail-description img { max-width: 100%; margin-top: 20px; border-radius: 8px; }
+    .product-detail-description img { width: 100%; margin-bottom: 10px; border-radius: 8px; }
+    .gallery-grid { display: grid; gap: 10px; }
   </style>
 </head>
 <body>
@@ -95,16 +99,27 @@
         <div class="product-detail-info">
           <h1>${product.name}</h1>
           <div class="product-detail-price">₽ ${product.price.toLocaleString()}</div>
+
           <button class="add-btn" style="padding: 20px;" onclick="addToCart('${product.id}')" ${product.is_sold_out ? 'disabled' : ''}>
             ${product.is_sold_out ? 'Нет в наличии' : 'Добавить в корзину'}
           </button>
+
+          <div style="margin-top: 20px; font-size: 13px; color: #888;">
+            Категория: ${product.category}
+          </div>
           
           <div class="product-detail-description">
             ${product.detail_html || ''}
-            ${product.detail_image_url ? `<img src="${product.detail_image_url}" alt="Details">` : ''}
           </div>
         </div>
       `;
+
+      document.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', () => {
+          item.parentElement.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+          item.classList.add('selected');
+        });
+      });
     }
 
     // Override the alert in app.js
