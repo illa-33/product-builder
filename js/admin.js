@@ -41,7 +41,9 @@ function renderCustomerNotice() {
   container.innerHTML = `
     <div class="account-notice">
       <strong>Добро пожаловать!</strong><br>
-      Это информационная панель. Если вы хотите сделать заказ, пожалуйста, добавьте товары в корзину и оформите заказ через WhatsApp.
+      Вы можете сделать заказ без регистрации.
+      Добавьте нужные товары в корзину и отправьте заказ через WhatsApp.
+      Стоимость доставки оплачивается один раз за заказ. (₽500)
     </div>
     <div class="admin-login-link">
       <button onclick="renderLoginForm()" class="btn-text">Вход для администратора</button>
@@ -105,6 +107,9 @@ window.logout = function() {
 window.renderAdminForm = function(product = null) {
   const container = document.getElementById('account-modal-body');
   if(!container) return;
+  
+  const options = product?.options || {};
+  
   container.innerHTML = `
     <h3 style="text-transform:uppercase;">${product ? 'Редактировать' : 'Добавить'} товар</h3>
     <form onsubmit="handleProductSubmit(event, ${product ? `'${product.id}'` : 'null'})" class="account-form">
@@ -129,6 +134,21 @@ window.renderAdminForm = function(product = null) {
           <option value="accessories" ${product?.category === 'accessories' ? 'selected' : ''}>Аксессуары</option>
         </select>
       </div>
+      
+      <div class="form-group" style="border: 1px solid #eee; padding: 10px; border-radius: 6px;">
+        <label style="color: #000; margin-bottom: 10px; display: block;">Параметры (Опции)</label>
+        <div id="options-container">
+          ${Object.entries(options).map(([name, values], idx) => `
+            <div class="option-row" style="display: flex; gap: 5px; margin-bottom: 10px;">
+              <input type="text" placeholder="Напр: Размер" class="opt-name" value="${name}" style="flex: 1;">
+              <input type="text" placeholder="Значения (через запятую)" class="opt-values" value="${values.join(', ')}" style="flex: 2;">
+              <button type="button" onclick="this.parentElement.remove()" style="color: red; border: none; background: none; font-weight: bold; cursor: pointer;">✕</button>
+            </div>
+          `).join('')}
+        </div>
+        <button type="button" onclick="addOptionRow()" class="btn-text" style="text-decoration: none; color: blue; font-weight: bold;">＋ Добавить параметр</button>
+      </div>
+
       <div class="form-group">
         <label>Медиа (Изображение/Видео URL)</label>
         <input type="text" id="p-media-url" value="${product ? (product.image_url || product.video_url || '') : ''}" placeholder="Введите URL">
@@ -136,7 +156,7 @@ window.renderAdminForm = function(product = null) {
         <input type="file" id="p-media-file" accept="image/*,video/*">
       </div>
       <div class="form-group">
-        <label>Детали (HTML или Image URL)</label>
+        <label>Детали (HTML 또는 Image URL)</label>
         <textarea id="p-detail-html" placeholder="Введите HTML (опционально)">${product ? (product.detail_html || '') : ''}</textarea>
         <input type="text" id="p-detail-url" value="${product ? (product.detail_image_url || '') : ''}" placeholder="URL изображения деталей">
         <p style="font-size:10px; color:#999;">ИЛИ загрузите файл:</p>
@@ -152,6 +172,19 @@ window.renderAdminForm = function(product = null) {
   `;
 }
 
+window.addOptionRow = function() {
+  const container = document.getElementById('options-container');
+  const div = document.createElement('div');
+  div.className = 'option-row';
+  div.style.cssText = 'display: flex; gap: 5px; margin-bottom: 10px;';
+  div.innerHTML = `
+    <input type="text" placeholder="Напр: Размер" class="opt-name" style="flex: 1;">
+    <input type="text" placeholder="Значения (через запятую)" class="opt-values" style="flex: 2;">
+    <button type="button" onclick="this.parentElement.remove()" style="color: red; border: none; background: none; font-weight: bold; cursor: pointer;">✕</button>
+  `;
+  container.appendChild(div);
+}
+
 window.handleProductSubmit = async function(e, id) {
   e.preventDefault();
   const name = document.getElementById('p-name').value;
@@ -163,6 +196,17 @@ window.handleProductSubmit = async function(e, id) {
   const detailUrl = document.getElementById('p-detail-url').value;
   const detailFile = document.getElementById('p-detail-file').files[0];
   const isSoldOut = document.getElementById('p-sold-out').checked;
+
+  // Collect options
+  const options = {};
+  const rows = document.querySelectorAll('.option-row');
+  rows.forEach(row => {
+    const optName = row.querySelector('.opt-name').value.trim();
+    const optValues = row.querySelector('.opt-values').value.split(',').map(v => v.trim()).filter(v => v);
+    if (optName && optValues.length > 0) {
+      options[optName] = optValues;
+    }
+  });
 
   try {
     let finalMediaUrl = mediaUrl;
@@ -185,7 +229,8 @@ window.handleProductSubmit = async function(e, id) {
       video_url: isVideo ? finalMediaUrl : null,
       detail_html: detailHtml || null,
       detail_image_url: finalDetailUrl || null,
-      is_sold_out: isSoldOut
+      is_sold_out: isSoldOut,
+      options: options // Added options field
     };
 
     if (id) {
@@ -227,12 +272,13 @@ window.handleBulkUpload = async function() {
         throw new Error("Missing required fields (name, price, category)");
       }
       item.created_at = new Date().toISOString();
+      item.options = item.options || {}; // Ensure options field is included
       await window.api.addProduct(item);
     }
     alert('Успешно загружено!');
     location.reload();
   } catch (err) {
-    alert('Ошибка: Неверный формат JSON или данные. ' + err.message);
+    alert('Ошибка: Неверный формат JSON 또는 데이터. ' + err.message);
   }
 }
 

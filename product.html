@@ -289,8 +289,7 @@
     // 상태 및 데이터 관리
     let currentSlide = 0;
     let totalSlides = 0;
-    let selectedColor = null;
-    let selectedSize = null;
+    let selectedOptions = {};
     let currentProduct = null;
 
     async function loadProductDetail() {
@@ -340,9 +339,8 @@
       });
       totalSlides = mediaUrls.length;
 
-      // 옵션 데이터 Fallback 처리 (DB에 없으면 기본 배열 사용)
-      const colors = (Array.isArray(product.colors) && product.colors.length > 0) ? product.colors : ['Black', 'White'];
-      const sizes = (Array.isArray(product.sizes) && product.sizes.length > 0) ? product.sizes : ['S', 'M', 'L'];
+      // 옵션 데이터 파싱
+      const options = product.options || {};
 
       const content = document.getElementById('product-detail-content');
       
@@ -381,25 +379,16 @@
             </div>
 
             <div class="options-section">
-              <!-- 색상 옵션 -->
-              <div class="option-group">
-                <label>Цвет (Color)</label>
-                <div class="option-list">
-                  ${colors.map(c => `
-                    <button class="option-btn color-btn" onclick="selectColor('${c}', this)">${c}</button>
-                  `).join('')}
+              ${Object.entries(options).map(([optName, optValues]) => `
+                <div class="option-group">
+                  <label>${optName}</label>
+                  <div class="option-list">
+                    ${optValues.map(val => `
+                      <button class="option-btn opt-${optName.replace(/\s+/g, '')}" onclick="selectOption('${optName}', '${val}', this)">${val}</button>
+                    `).join('')}
+                  </div>
                 </div>
-              </div>
-
-              <!-- 사이즈 옵션 -->
-              <div class="option-group">
-                <label>Размер (Size)</label>
-                <div class="option-list">
-                  ${sizes.map(s => `
-                    <button class="option-btn size-btn" onclick="selectSize('${s}', this)">${s}</button>
-                  `).join('')}
-                </div>
-              </div>
+              `).join('')}
             </div>
 
             <!-- 하단 상세 설명 영역 (데스크톱에서는 우측 배치, 모바일은 하단으로 흐름) -->
@@ -416,28 +405,30 @@
         <!-- Sticky 장바구니 버튼 영역 -->
         <div class="sticky-cart-wrapper">
           <button id="add-cart-btn" class="btn-add-cart" disabled onclick="handleAddToCart('${product.id}')">
-            ${product.is_sold_out ? 'Нет в наличии' : 'Выберите опции (Select Options)'}
+            ${product.is_sold_out ? 'Нет в наличии' : (Object.keys(options).length > 0 ? 'Выберите параметры' : 'В корзину')}
           </button>
         </div>
       `;
 
       // Carousel Swipe 이벤트 연결
       if (totalSlides > 1) initSwipe();
+      
+      // If no options, enable button immediately
+      if (Object.keys(options).length === 0) {
+        validateOptions();
+      }
     }
 
     /* --- UI 조작 및 상태 관리 --- */
 
-    window.selectColor = (color, btnElement) => {
-      selectedColor = color;
-      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+    window.selectOption = (optName, val, btnElement) => {
+      selectedOptions[optName] = val;
+      
+      // Update UI
+      const selector = `.opt-${optName.replace(/\s+/g, '')}`;
+      document.querySelectorAll(selector).forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
-      validateOptions();
-    };
-
-    window.selectSize = (size, btnElement) => {
-      selectedSize = size;
-      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
+      
       validateOptions();
     };
 
@@ -445,44 +436,39 @@
       const btn = document.getElementById('add-cart-btn');
       if (currentProduct && currentProduct.is_sold_out) {
         btn.disabled = true;
-        btn.innerText = 'Нет в наличии (Sold Out)';
+        btn.innerText = 'Нет в наличии';
         return;
       }
 
-      if (selectedColor && selectedSize) {
+      const productOptions = currentProduct.options || {};
+      const requiredOptions = Object.keys(productOptions);
+      const allSelected = requiredOptions.every(opt => selectedOptions[opt]);
+
+      if (allSelected) {
         btn.disabled = false;
-        btn.innerText = 'В корзину (Add to Cart)';
+        btn.innerText = 'В корзину';
       } else {
         btn.disabled = true;
-        btn.innerText = 'Выберите опции (Select Options)';
+        btn.innerText = 'Выберите параметры';
       }
     };
 
-    /* --- 장바구니 연동 로직 (app.js 코드 수정 없이 완벽 호환되게 처리) --- */
+    /* --- 장바구니 연동 로직 --- */
     
     window.handleAddToCart = (id) => {
-      if (!selectedColor || !selectedSize) return;
+      const productOptions = currentProduct.options || {};
+      const requiredOptions = Object.keys(productOptions);
+      const allSelected = requiredOptions.every(opt => selectedOptions[opt]);
       
-      // 기존 addToCart가 window.allProducts 배열을 참조하므로, 배열에서 임시로 객체를 찾아 이름 변경 후 복구
-      const p = window.allProducts ? window.allProducts.find(x => x.id === id) : null;
-      let originalName = '';
-      
-      if (p) {
-        originalName = p.name;
-        // 기존 app.js 로직 내 장바구니 배열에 옵션이 이름과 함께 추가되도록 조치
-        p.name = `${originalName} (${selectedColor} / ${selectedSize})`;
+      if (!allSelected && requiredOptions.length > 0) {
+        alert('Пожалуйста, выберите все параметры.');
+        return;
       }
-
-      // 기존 장바구니 함수 안전하게 호출
+      
       if (typeof window.addToCart === 'function') {
-        window.addToCart(id);
+        window.addToCart(currentProduct, selectedOptions);
       } else {
         alert('Ошибка корзины. Пожалуйста, обновите страницу.');
-      }
-
-      // 렌더링 끝난 직후 원본 상품명 복구
-      if (p) {
-        p.name = originalName;
       }
     };
 

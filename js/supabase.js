@@ -14,7 +14,11 @@ async function fetchProducts() {
     console.error('Error fetching products:', error);
     return [];
   }
-  return data;
+  // Ensure options field exists for all products
+  return (data || []).map(p => ({
+    ...p,
+    options: p.options || {}
+  }));
 }
 
 async function addProduct(product) {

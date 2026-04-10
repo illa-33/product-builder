@@ -84,8 +84,8 @@ function renderProductGrid(category = 'all') {
             <button class="btn-soldout" onclick="toggleSoldOutStatus('${p.id}', ${p.is_sold_out})" style="font-size:10px; padding:4px;">${p.is_sold_out ? 'В наличии' : 'Распродано'}</button>
           </div>
         ` : ''}
-        <button class="add-btn" onclick="addToCart('${p.id}')" ${p.is_sold_out ? 'disabled' : ''}>
-          ${p.is_sold_out ? 'Нет в наличии' : 'В корзину'}
+        <button class="add-btn" onclick="openProductDetail('${p.id}')" ${p.is_sold_out ? 'disabled' : ''}>
+          ${p.is_sold_out ? 'Нет в наличии' : 'Подробнее'}
         </button>
       </div>
     </div>
@@ -101,6 +101,38 @@ function setupEventListeners() {
       renderProductGrid(cat);
     });
   });
+
+  // Cart event delegation
+  const cartContainer = document.getElementById('cart-items');
+  if (cartContainer) {
+    cartContainer.addEventListener('click', function(e) {
+      const target = e.target;
+      
+      // 버튼이 아닌 경우 무시
+      if (!target) return;
+
+      // Handle nested elements within the button just in case
+      const btn = target.closest('.btn-increase, .btn-decrease, .btn-remove');
+      if (!btn) return;
+
+      const id = btn.dataset.id;
+      if (!id) return;
+
+      console.log('clicked:', btn.className, id);
+
+      if (btn.classList.contains('btn-increase')) {
+        changeQuantity(id, 1);
+      }
+      
+      if (btn.classList.contains('btn-decrease')) {
+        changeQuantity(id, -1);
+      }
+      
+      if (btn.classList.contains('btn-remove')) {
+        removeFromCart(id);
+      }
+    });
+  }
 }
 
 // Side Menu
@@ -136,23 +168,45 @@ window.handleSearch = (value) => {
 };
 
 // Cart logic
-function addToCart(id) {
-  const product = allProducts.find(p => p.id === id);
+function addToCart(idOrProduct, selectedOptions = {}) {
+  let product;
+  if (typeof idOrProduct === 'object' && idOrProduct !== null) {
+    product = idOrProduct;
+  } else {
+    product = allProducts.find(p => p.id === idOrProduct);
+  }
+
   if (!product || product.is_sold_out) return;
 
-  const existing = cart.find(item => item.id === id);
-  if (existing) {
-    existing.quantity += 1;
+  // Use the requested comparison logic: same ID AND same options
+  const existingItem = cart.find(item =>
+    item.id === product.id &&
+    JSON.stringify(item.selectedOptions || {}) === JSON.stringify(selectedOptions)
+  );
+
+  if (existingItem) {
+    existingItem.quantity += 1;
   } else {
-    cart.push({ ...product, quantity: 1 });
+    // Create a unique cartId for internal tracking
+    const optionKey = encodeURIComponent(JSON.stringify(selectedOptions));
+    const cartId = `${product.id}-${optionKey}`;
+    cart.push({ 
+      cartId: cartId,
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+      quantity: 1,
+      selectedOptions: selectedOptions 
+    });
   }
   saveCart();
   updateCartUI();
   window.openCart();
 }
 
-function removeFromCart(id) {
-  cart = cart.filter(item => item.id !== id);
+function removeFromCart(cartId) {
+  cart = cart.filter(item => item.cartId !== cartId);
   saveCart();
   updateCartUI();
 }
@@ -165,49 +219,55 @@ function updateCartUI() {
   const container = document.getElementById('cart-items');
   if (!container) return;
 
-  container.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <img src="${item.image_url || 'https://via.placeholder.com/60x80?text=No+Image'}" alt="${item.name}">
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price">₽ ${item.price.toLocaleString()}</div>
-        <div class="quantity-controls-mini">
-          <button onclick="updateCartQuantity('${item.id}', -1)">-</button>
-          <span>${item.quantity}</span>
-          <button onclick="updateCartQuantity('${item.id}', 1)">+</button>
+  container.innerHTML = cart.map(item => {
+    // Implement requested option display: Футбока (Black / L)
+    const optionsStr = Object.values(item.selectedOptions || {}).join(' / ');
+    const displayName = optionsStr ? `${item.name} (${optionsStr})` : item.name;
+
+    return `
+      <div class="cart-item">
+        <img src="${item.image_url || 'https://via.placeholder.com/60x80?text=No+Image'}" alt="${item.name}">
+        <div class="cart-item-info">
+          <div class="cart-item-name">${displayName}</div>
+          <div class="cart-item-price">₽ ${item.price.toLocaleString()}</div>
+          <div class="quantity-controls-mini">
+            <button class="btn-decrease" data-id="${item.cartId}">-</button>
+            <span>${item.quantity}</span>
+            <button class="btn-increase" data-id="${item.cartId}">+</button>
+          </div>
         </div>
+        <button class="btn-remove" data-id="${item.cartId}">×</button>
       </div>
-      <button class="remove-item" onclick="removeFromCart('${item.id}')">×</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   const goodsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = goodsTotal > 0 ? goodsTotal + SHIPPING_FEE : 0;
+  const totalAmount = goodsTotal + SHIPPING_FEE;
 
   const goodsEl = document.getElementById('cart-goods-total');
   if (goodsEl) goodsEl.innerText = `₽ ${goodsTotal.toLocaleString()}`;
 
-  const shippingEl = document.getElementById('cart-shipping-fee');
+  const shippingEl = document.getElementById('cart-shipping');
   if (shippingEl) {
-    shippingEl.innerText = goodsTotal > 0 ? `₽ ${SHIPPING_FEE.toLocaleString()}` : '₽ 0';
+    shippingEl.innerText = `₽ ${SHIPPING_FEE.toLocaleString()}`;
   }
   
   const totalEl = document.getElementById('cart-total');
-  if (totalEl) totalEl.innerText = `₽ ${total.toLocaleString()}`;
+  if (totalEl) totalEl.innerText = `₽ ${totalAmount.toLocaleString()}`;
 }
 
-window.updateCartQuantity = (id, delta) => {
-  const item = cart.find(x => x.id === id);
+function changeQuantity(cartId, delta) {
+  const item = cart.find(x => x.cartId === cartId);
   if (item) {
     item.quantity += delta;
     if (item.quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(cartId);
     } else {
       saveCart();
       updateCartUI();
     }
   }
-};
+}
 
 function saveCart() {
   localStorage.setItem('rb_cart', JSON.stringify(cart));
@@ -219,14 +279,16 @@ function sendWhatsApp() {
     return;
   }
 
-  const goodsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = goodsTotal + SHIPPING_FEE;
+  const itemsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalAmount = itemsTotal + SHIPPING_FEE;
 
-  let msg = `[ORDER]\n`;
+  let msg = `Товары:\n`;
   cart.forEach(item => {
-    msg += `- ${item.name} x ${item.quantity}\n`;
+    const optionsStr = Object.values(item.selectedOptions || {}).join(' / ');
+    const displayName = optionsStr ? `${item.name} (${optionsStr})` : item.name;
+    msg += `${displayName} x ${item.quantity}\n`;
   });
-  msg += `\nТовары: ₽ ${goodsTotal.toLocaleString()}\nДоставка: ₽ ${SHIPPING_FEE.toLocaleString()}\nИтого: ₽ ${total.toLocaleString()}`;
+  msg += `\nОбщая сумма: ${totalAmount} RUB`;
 
   const encodedMsg = encodeURIComponent(msg);
   window.open(`https://wa.me/${whatsappNumber}?text=${encodedMsg}`);
@@ -238,6 +300,7 @@ function openProductDetail(id) {
 
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
+window.changeQuantity = changeQuantity;
 window.sendWhatsApp = sendWhatsApp;
 window.openProductDetail = openProductDetail;
 window.openCart = () => document.getElementById('cart-modal').classList.add('active');
