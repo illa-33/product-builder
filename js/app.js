@@ -12,12 +12,17 @@ async function init() {
 }
 
 async function loadProducts() {
-  allProducts = await window.api.fetchProducts();
+  try {
+    allProducts = await window.api.fetchProducts();
+  } catch(e) {
+    console.error("Failed to fetch products", e);
+    allProducts = []; // fallback
+  }
 }
 
 function renderAll() {
   renderNewSection();
-  renderProductGrid();
+  renderProductGrid(currentCategory);
   updateCartUI();
 }
 
@@ -25,7 +30,6 @@ function renderNewSection() {
   const container = document.getElementById('new-products-scroll');
   if (!container) return;
 
-  // New products: latest 8, not necessarily sold out excluded but latest first
   const newItems = [...allProducts]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     .slice(0, 8);
@@ -48,7 +52,7 @@ function renderProductGrid(category = 'all') {
   if (!grid) return;
 
   currentCategory = category;
-  const isAdmin = sessionStorage.getItem('rb_admin') === 'true';
+  const isAdmin = localStorage.getItem('rb_admin') === 'true';
 
   let filtered = allProducts.filter(p => {
     const matchCategory = (category === 'all' || p.category === category);
@@ -56,7 +60,6 @@ function renderProductGrid(category = 'all') {
     return matchCategory && matchSearch;
   });
 
-  // Sort: sold out at bottom, then latest
   const sorted = filtered.sort((a, b) => {
     if (a.is_sold_out && !b.is_sold_out) return 1;
     if (!a.is_sold_out && b.is_sold_out) return -1;
@@ -67,18 +70,18 @@ function renderProductGrid(category = 'all') {
     <div class="product-card ${p.is_sold_out ? 'sold-out' : ''}">
       <div class="img-wrapper" onclick="openProductDetail('${p.id}')">
         <img src="${p.image_url || 'https://via.placeholder.com/300x400?text=No+Image'}" alt="${p.name}" loading="lazy">
-        ${p.is_sold_out ? '<div class="sold-out-badge">SOLD OUT</div>' : ''}
+        ${p.is_sold_out ? '<div class="sold-out-badge">НЕТ В НАЛИЧИИ</div>' : ''}
       </div>
       <div class="product-info">
-        <div onclick="openProductDetail('${p.id}')">
+        <div onclick="openProductDetail('${p.id}')" style="cursor:pointer;">
           <div class="product-name">${p.name}</div>
           <div class="product-price">₽ ${p.price.toLocaleString()}</div>
         </div>
         ${isAdmin ? `
-          <div class="admin-product-actions">
-            <button onclick="editProductFromGrid('${p.id}')">Изменить</button>
-            <button class="btn-delete" onclick="deleteProductFromGrid('${p.id}')">Удалить</button>
-            <button class="btn-soldout" onclick="toggleSoldOutStatus('${p.id}', ${p.is_sold_out})">${p.is_sold_out ? 'В наличии' : 'Нет в наличии'}</button>
+          <div class="admin-product-actions" style="margin-bottom:10px; display:flex; gap:5px;">
+            <button onclick="editProductFromGrid('${p.id}')" style="font-size:10px; padding:4px;">Изменить</button>
+            <button class="btn-delete" onclick="deleteProductFromGrid('${p.id}')" style="font-size:10px; padding:4px; color:red;">Удалить</button>
+            <button class="btn-soldout" onclick="toggleSoldOutStatus('${p.id}', ${p.is_sold_out})" style="font-size:10px; padding:4px;">${p.is_sold_out ? 'В наличии' : 'Распродано'}</button>
           </div>
         ` : ''}
         <button class="add-btn" onclick="addToCart('${p.id}')" ${p.is_sold_out ? 'disabled' : ''}>
@@ -90,7 +93,6 @@ function renderProductGrid(category = 'all') {
 }
 
 function setupEventListeners() {
-  // Category tabs
   document.querySelectorAll('.category-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
       const cat = e.currentTarget.dataset.category;
@@ -101,10 +103,39 @@ function setupEventListeners() {
   });
 }
 
+// Side Menu
 window.toggleSideMenu = () => {
   document.getElementById('side-menu').classList.toggle('active');
 };
 
+// Search Bar
+window.toggleSearchBar = () => {
+  const container = document.getElementById('search-bar-container');
+  if (container) {
+    if (container.style.display === 'block') {
+      container.style.display = 'none';
+      searchQuery = '';
+      const input = document.getElementById('global-search-input');
+      if(input) input.value = '';
+      renderProductGrid(currentCategory);
+    } else {
+      container.style.display = 'block';
+      const input = document.getElementById('global-search-input');
+      if(input) input.focus();
+    }
+  }
+};
+
+let searchTimeout = null;
+window.handleSearch = (value) => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchQuery = value.trim();
+    renderProductGrid(currentCategory);
+  }, 300); // debounce 300ms
+};
+
+// Cart logic
 function addToCart(id) {
   const product = allProducts.find(p => p.id === id);
   if (!product || product.is_sold_out) return;
@@ -113,29 +144,12 @@ function addToCart(id) {
   if (existing) {
     existing.quantity += 1;
   } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image_url: product.image_url,
-      quantity: 1
-    });
+    cart.push({ ...product, quantity: 1 });
   }
   saveCart();
   updateCartUI();
-  openCart();
+  window.openCart();
 }
-
-window.changeQuantity = (id, delta) => {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.quantity += delta;
-  if (item.quantity <= 0) {
-    cart = cart.filter(i => i.id !== id);
-  }
-  saveCart();
-  updateCartUI();
-};
 
 function removeFromCart(id) {
   cart = cart.filter(item => item.id !== id);
@@ -144,44 +158,56 @@ function removeFromCart(id) {
 }
 
 function updateCartUI() {
-  const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-  document.querySelectorAll('.cart-count').forEach(el => el.innerText = count);
+  const countEls = document.querySelectorAll('.cart-count');
+  const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  countEls.forEach(el => el.innerText = totalCount);
 
-  const cartItemsContainer = document.getElementById('cart-items');
-  if (cartItemsContainer) {
-    if (cart.length === 0) {
-      cartItemsContainer.innerHTML = '<p style="text-align:center; padding: 20px; color:#999;">Ваша корзина пуста.</p>';
-    } else {
-      cartItemsContainer.innerHTML = cart.map(item => `
-        <div class="cart-item">
-          <img src="${item.image_url || 'https://via.placeholder.com/100x130'}" alt="${item.name}">
-          <div class="cart-item-info">
-            <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-price">₽ ${item.price.toLocaleString()} x ${item.quantity}</div>
-            <div class="quantity-controls-mini">
-              <button onclick="changeQuantity('${item.id}', -1)">-</button>
-              <span>${item.quantity}</span>
-              <button onclick="changeQuantity('${item.id}', 1)">+</button>
-            </div>
-          </div>
-          <button class="remove-item" onclick="removeFromCart('${item.id}')">×</button>
+  const container = document.getElementById('cart-items');
+  if (!container) return;
+
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img src="${item.image_url || 'https://via.placeholder.com/60x80?text=No+Image'}" alt="${item.name}">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">₽ ${item.price.toLocaleString()}</div>
+        <div class="quantity-controls-mini">
+          <button onclick="updateCartQuantity('${item.id}', -1)">-</button>
+          <span>${item.quantity}</span>
+          <button onclick="updateCartQuantity('${item.id}', 1)">+</button>
         </div>
-      `).join('');
-    }
-  }
+      </div>
+      <button class="remove-item" onclick="removeFromCart('${item.id}')">×</button>
+    </div>
+  `).join('');
 
   const goodsTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const total = goodsTotal + SHIPPING_FEE;
+  const total = goodsTotal > 0 ? goodsTotal + SHIPPING_FEE : 0;
 
-  if (document.getElementById('cart-goods-total')) {
-    document.getElementById('cart-goods-total').innerText = `₽ ${goodsTotal.toLocaleString()}`;
+  const goodsEl = document.getElementById('cart-goods-total');
+  if (goodsEl) goodsEl.innerText = `₽ ${goodsTotal.toLocaleString()}`;
+
+  const shippingEl = document.getElementById('cart-shipping-fee');
+  if (shippingEl) {
+    shippingEl.innerText = goodsTotal > 0 ? `₽ ${SHIPPING_FEE.toLocaleString()}` : '₽ 0';
   }
-  if (document.getElementById('cart-shipping')) {
-    document.getElementById('cart-shipping').innerText = `₽ ${SHIPPING_FEE.toLocaleString()}`;
-  }
+  
   const totalEl = document.getElementById('cart-total');
   if (totalEl) totalEl.innerText = `₽ ${total.toLocaleString()}`;
 }
+
+window.updateCartQuantity = (id, delta) => {
+  const item = cart.find(x => x.id === id);
+  if (item) {
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      removeFromCart(id);
+    } else {
+      saveCart();
+      updateCartUI();
+    }
+  }
+};
 
 function saveCart() {
   localStorage.setItem('rb_cart', JSON.stringify(cart));
@@ -207,15 +233,9 @@ function sendWhatsApp() {
 }
 
 function openProductDetail(id) {
-  // Navigation to detail page if needed
-  // window.location.href = `product.html?id=${id}`;
-  const p = allProducts.find(x => x.id === id);
-  if (p) {
-    alert(`Детали товара: ${p.name}\n(Функционал детальной страницы в разработке)`);
-  }
+  window.location.href = `product.html?id=${id}`;
 }
 
-// Modal functions
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.sendWhatsApp = sendWhatsApp;
@@ -226,50 +246,9 @@ window.closeModal = (id) => document.getElementById(id).classList.remove('active
 window.openAccount = () => {
   const modal = document.getElementById('account-modal');
   modal.classList.add('active');
-  renderAccountContent();
-};
-
-function renderAccountContent() {
-  const container = document.getElementById('account-modal-body');
-  container.innerHTML = `
-    <div class="account-notice">
-      <p>Вы можете сделать заказ без регистрации.<br>
-      Добавьте нужные товары в корзину и отправьте заказ через WhatsApp.<br>
-      Стоимость доставки оплачивается один раз за заказ. (₽500)</p>
-    </div>
-    <div class="admin-login-link">
-      <button onclick="showAdminLogin()" class="btn-text">Вход для администратора</button>
-    </div>
-  `;
-}
-
-window.showAdminLogin = () => {
-  const container = document.getElementById('account-modal-body');
-  container.innerHTML = `
-    <h3 style="text-transform:uppercase;">Вход для администратора</h3>
-    <form onsubmit="handleAdminLogin(event)" class="account-form">
-      <input type="password" id="admin-pass" placeholder="Пароль" required>
-      <button type="submit" class="btn-black">Войти</button>
-      <button type="button" onclick="renderAccountContent()" class="btn-text">Назад</button>
-    </form>
-  `;
-};
-
-window.handleAdminLogin = (e) => {
-  e.preventDefault();
-  const pass = document.getElementById('admin-pass').value;
-  // Simple password check for demo purposes
-  if (pass === '01068448600') {
-    sessionStorage.setItem('rb_admin', 'true');
-    location.reload();
-  } else {
-    alert('Неверный пароль.');
+  if (window.renderAccountContent) {
+    window.renderAccountContent();
   }
-};
-
-window.logout = () => {
-  sessionStorage.removeItem('rb_admin');
-  location.reload();
 };
 
 document.addEventListener('DOMContentLoaded', init);

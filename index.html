@@ -116,6 +116,10 @@
     .account-form input, .account-form select, .account-form textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
     .btn-black { background: var(--text); color: white; border: none; padding: 15px; font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 6px; }
 
+    /* Search Bar Overlay */
+    .search-bar-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.98); z-index: 4000; padding: 60px 20px; }
+    .search-input-field { width: 100%; max-width: 800px; margin: 60px auto 0; display: block; border: none; border-bottom: 2px solid #000; font-size: 32px; font-weight: 700; padding: 20px 0; background: transparent; outline: none; }
+
     /* Mobile Nav */
     .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid var(--border); padding: 10px 0; z-index: 1000; justify-content: space-around; }
     @media (max-width: 768px) { .mobile-nav { display: flex; } }
@@ -141,6 +145,7 @@
   </header>
 
   <div class="search-bar-container" id="search-bar-container">
+    <button class="close-btn" onclick="toggleSearchBar()" style="position: absolute; top: 20px; right: 20px; font-size: 32px; background: none; border: none; cursor: pointer; color: #000;">×</button>
     <input type="text" class="search-input-field" id="global-search-input" placeholder="Поиск товаров..." oninput="handleSearch(this.value)">
   </div>
 
@@ -181,6 +186,7 @@
   </main>
 
   <div class="side-menu" id="side-menu">
+    <button class="close-btn" onclick="toggleSideMenu()" style="top: 20px; right: 20px;">×</button>
     <h3>Категории</h3>
     <ul>
       <li onclick="renderProductGrid('outer'); toggleSideMenu()">Аутер</li>

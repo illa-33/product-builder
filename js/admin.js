@@ -1,11 +1,12 @@
-const isAdmin = sessionStorage.getItem('rb_admin') === 'true';
+const getIsAdmin = () => localStorage.getItem('rb_admin') === 'true';
 
 function initAdmin() {
-  if (!isAdmin) return;
+  if (!getIsAdmin()) return;
   
   const headerRight = document.getElementById('header-right');
-  if (headerRight) {
+  if (headerRight && !document.getElementById('admin-header-add-btn')) {
     const adminBtn = document.createElement('button');
+    adminBtn.id = 'admin-header-add-btn';
     adminBtn.className = 'icon-btn';
     adminBtn.style.fontSize = '14px';
     adminBtn.style.fontWeight = '700';
@@ -20,12 +21,72 @@ function initAdmin() {
 
 function openAdminModal() {
   const modal = document.getElementById('account-modal');
-  modal.classList.add('active');
-  renderAdminDashboard();
+  if(modal) {
+    modal.classList.add('active');
+    renderAdminDashboard();
+  }
+}
+
+window.renderAccountContent = function() {
+  if (getIsAdmin()) {
+    renderAdminDashboard();
+  } else {
+    renderCustomerNotice();
+  }
+}
+
+function renderCustomerNotice() {
+  const container = document.getElementById('account-modal-body');
+  if (!container) return;
+  container.innerHTML = `
+    <div class="account-notice">
+      <strong>Добро пожаловать!</strong><br>
+      Это информационная панель. Если вы хотите сделать заказ, пожалуйста, добавьте товары в корзину и оформите заказ через WhatsApp.
+    </div>
+    <div class="admin-login-link">
+      <button onclick="renderLoginForm()" class="btn-text">Вход для администратора</button>
+    </div>
+  `;
+}
+
+window.renderLoginForm = function() {
+  const container = document.getElementById('account-modal-body');
+  if (!container) return;
+  container.innerHTML = `
+    <h3 style="text-transform:uppercase; margin-bottom: 20px;">Вход для администратора</h3>
+    <form onsubmit="handleLogin(event)" class="account-form">
+      <div class="form-group">
+        <label>Логин</label>
+        <input type="text" id="login-user" required>
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" id="login-pass" required>
+      </div>
+      <button type="submit" class="btn-black">Войти</button>
+      <button type="button" onclick="renderCustomerNotice()" class="btn-text" style="margin-top:10px;">Назад</button>
+    </form>
+  `;
+}
+
+window.handleLogin = function(e) {
+  e.preventDefault();
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+
+  // Credentials from previous version
+  if (user === 'islam0814' && pass === '01068448600') {
+    localStorage.setItem('rb_admin', 'true');
+    alert('Добро пожаловать, администратор!');
+    location.reload();
+  } else {
+    alert('Неверный логин или пароль');
+  }
 }
 
 function renderAdminDashboard() {
   const container = document.getElementById('account-modal-body');
+  if(!container) return;
   container.innerHTML = `
     <h3 style="text-transform:uppercase; margin-bottom: 20px;">Панель администратора</h3>
     <div style="display:grid; gap:10px;">
@@ -36,8 +97,14 @@ function renderAdminDashboard() {
   `;
 }
 
-function renderAdminForm(product = null) {
+window.logout = function() {
+  localStorage.removeItem('rb_admin');
+  location.reload();
+}
+
+window.renderAdminForm = function(product = null) {
   const container = document.getElementById('account-modal-body');
+  if(!container) return;
   container.innerHTML = `
     <h3 style="text-transform:uppercase;">${product ? 'Редактировать' : 'Добавить'} товар</h3>
     <form onsubmit="handleProductSubmit(event, ${product ? `'${product.id}'` : 'null'})" class="account-form">
@@ -85,7 +152,7 @@ function renderAdminForm(product = null) {
   `;
 }
 
-async function handleProductSubmit(e, id) {
+window.handleProductSubmit = async function(e, id) {
   e.preventDefault();
   const name = document.getElementById('p-name').value;
   const price = parseInt(document.getElementById('p-price').value);
@@ -108,7 +175,6 @@ async function handleProductSubmit(e, id) {
       finalDetailUrl = await window.api.uploadFile(detailFile);
     }
 
-    // Check if media is video
     const isVideo = finalMediaUrl && (finalMediaUrl.includes('.mp4') || finalMediaUrl.includes('.mov') || mediaFile?.type.startsWith('video/'));
 
     const productData = {
@@ -119,14 +185,14 @@ async function handleProductSubmit(e, id) {
       video_url: isVideo ? finalMediaUrl : null,
       detail_html: detailHtml || null,
       detail_image_url: finalDetailUrl || null,
-      is_sold_out: isSoldOut,
-      created_at: id ? undefined : new Date().toISOString() // 수정 시에는 created_at을 건드리지 않음
+      is_sold_out: isSoldOut
     };
 
     if (id) {
       await window.api.updateProduct(id, productData);
       alert('Товар обновлен.');
     } else {
+      productData.created_at = new Date().toISOString();
       await window.api.addProduct(productData);
       alert('Товар добавлен.');
     }
@@ -137,11 +203,11 @@ async function handleProductSubmit(e, id) {
   }
 }
 
-function renderBulkUploadForm() {
+window.renderBulkUploadForm = function() {
   const container = document.getElementById('account-modal-body');
   container.innerHTML = `
     <h3 style="text-transform:uppercase;">Массовая загрузка</h3>
-    <p style="font-size:12px; margin-bottom:10px; color:#666;">Введите JSON массив или CSV данные.</p>
+    <p style="font-size:12px; margin-bottom:10px; color:#666;">Введите JSON массив.</p>
     <textarea id="bulk-data" placeholder='[{"name": "Item 1", "price": 5000, "category": "tops"}]' style="height: 200px; width:100%; border:1px solid #ddd; padding:10px; font-family:monospace; font-size:12px;"></textarea>
     <div style="margin-top:20px; display:grid; gap:10px;">
       <button onclick="handleBulkUpload()" class="btn-black">Загрузить</button>
@@ -150,50 +216,66 @@ function renderBulkUploadForm() {
   `;
 }
 
-async function handleBulkUpload() {
-  const rawData = document.getElementById('bulk-data').value.trim();
-  if (!rawData) return alert('Введите данные.');
-
+window.handleBulkUpload = async function() {
+  const dataStr = document.getElementById('bulk-data').value;
   try {
-    let products = [];
-    if (rawData.startsWith('[')) {
-      products = JSON.parse(rawData);
-    } else {
-      // Very simple CSV parser (header: name,price,category,image_url)
-      const lines = rawData.split('\n');
-      const header = lines[0].split(',');
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        if (values.length < 2) continue;
-        let p = {};
-        header.forEach((h, index) => {
-          let val = values[index]?.trim();
-          if (h.trim() === 'price') val = parseInt(val);
-          p[h.trim()] = val;
-        });
-        products.push(p);
+    const arr = JSON.parse(dataStr);
+    if(!Array.isArray(arr)) throw new Error("Not an array");
+    
+    for (const item of arr) {
+      if(!item.name || !item.price || !item.category) {
+        throw new Error("Missing required fields (name, price, category)");
       }
+      item.created_at = new Date().toISOString();
+      await window.api.addProduct(item);
     }
-
-    if (!Array.isArray(products)) throw new Error('Данные должны быть массивом.');
-
-    for (const p of products) {
-      await window.api.addProduct({
-        ...p,
-        is_sold_out: p.is_sold_out || false,
-        created_at: new Date().toISOString()
-      });
-    }
-    alert('Массовая загрузка завершена.');
+    alert('Успешно загружено!');
     location.reload();
   } catch (err) {
-    console.error(err);
-    alert('Ошибка при разборе данных: ' + err.message);
+    alert('Ошибка: Неверный формат JSON или данные. ' + err.message);
   }
 }
 
-window.renderAdminForm = renderAdminForm;
-window.renderBulkUploadForm = renderBulkUploadForm;
-window.handleBulkUpload = handleBulkUpload;
+// Global functions for grid actions
+window.editProductFromGrid = function(id) {
+  if (typeof allProducts !== 'undefined') {
+    const p = allProducts.find(x => x.id === id);
+    if (p) {
+      const modal = document.getElementById('account-modal');
+      modal.classList.add('active');
+      window.renderAdminForm(p);
+    }
+  } else {
+    window.api.fetchProducts().then(products => {
+      const p = products.find(x => x.id === id);
+      if (p) {
+        const modal = document.getElementById('account-modal');
+        modal.classList.add('active');
+        window.renderAdminForm(p);
+      }
+    });
+  }
+};
+
+window.deleteProductFromGrid = async function(id) {
+  if (confirm('Вы уверены, что хотите удалить этот товар?')) {
+    try {
+      await window.api.deleteProduct(id);
+      alert('Товар удален.');
+      location.reload();
+    } catch(err) {
+      alert('Ошибка при удалении: ' + err.message);
+    }
+  }
+};
+
+window.toggleSoldOutStatus = async function(id, currentStatus) {
+  try {
+    await window.api.updateProduct(id, { is_sold_out: !currentStatus });
+    location.reload();
+  } catch(err) {
+    alert('Ошибка обновления статуса: ' + err.message);
+  }
+};
 
 document.addEventListener('DOMContentLoaded', initAdmin);
